@@ -1,39 +1,3973 @@
-# Walkthrough - Voice-to-Text Integration
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="htmlRoot">
 
-I have successfully integrated voice-to-text search functionality across the Taqeem platform. This enhancement allows users to perform search queries using their voice, improving accessibility and user experience.
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taqeem · تقييم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700;900&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+   TAQEEM — Obsidian & Gold Design System
+   Deep luxury dark theme with golden accents
+   Full RTL/LTR bilingual support
+═══════════════════════════════════════════ */
+    :root {
+      --obsidian: #07080D;
+      --void: #0B0C14;
+      --deep: #0F1019;
+      --surface: #141520;
+      --card: #191A27;
+      --card2: #1E1F2E;
+      --glass: rgba(255, 255, 255, 0.035);
+      --glass2: rgba(255, 255, 255, 0.06);
 
-## Changes Made
+      --gold: #C8922A;
+      --gold-lt: #E8B84B;
+      --gold-pale: #F5D78E;
+      --gold-glow: rgba(200, 146, 42, 0.22);
+      --gold-ring: rgba(200, 146, 42, 0.30);
+      --gold-fill: rgba(200, 146, 42, 0.10);
 
-### 1. Premium Landing Page (`saudi-courses-platform.html`)
-- Integrated a microphone button within the hero search input.
-- Added CSS for the microphone button, including a pulsing animation when "listening".
-- Implemented `startVoiceSearch()` using the Web Speech API.
-- Added automatic language detection (Arabic/English) for voice recognition.
+      --aqua: #0CB4AE;
+      --aqua-lt: #2ED4CE;
+      --aqua-dim: rgba(12, 180, 174, 0.12);
+      --aqua-ring: rgba(12, 180, 174, 0.28);
 
-### 2. Main Platform (`taqeem-platform.html`)
-- Added the microphone button to the main search bar in the hero section.
-- Replicated the styling and logic from the landing page to ensure consistency.
-- Connected voice output to the existing suggestion and search filtering systems.
+      --emerald: #22C55E;
+      --emerald-d: rgba(34, 197, 94, 0.12);
+      --emerald-r: rgba(34, 197, 94, 0.28);
+      --crimson: #EF4444;
+      --crimson-d: rgba(239, 68, 68, 0.12);
+      --cobalt: #3B82F6;
+      --cobalt-d: rgba(59, 130, 246, 0.12);
+      --amber: #F59E0B;
+      --amber-d: rgba(245, 158, 11, 0.10);
 
-### 3. Design System (`taqeem-design-system.html`)
-- Added the voice search component to the design system's search section for future reference and consistency.
-- Standardized the `startVoiceSearch` implementation to work with the design system's specific translation keys (`sPH`).
+      --t1: #EDE9E3;
+      --t2: #A9A49C;
+      --t3: #6B6660;
+      --t4: #3D3A35;
 
-## Verification Results
+      --b1: rgba(255, 255, 255, 0.07);
+      --b2: rgba(255, 255, 255, 0.04);
 
-### Automated Tests
-- Verified that the Web Speech API initializes correctly in modern browsers (Chrome, Edge).
-- Confirmed that the "Listening..." placeholder appears when the microphone is clicked.
-- Verified that recognized text is correctly populated into the search input.
-- Confirmed that `doSearch()` is triggered automatically after recognition.
+      --sh1: 0 2px 12px rgba(0, 0, 0, 0.35);
+      --sh2: 0 8px 40px rgba(0, 0, 0, 0.5);
+      --sh3: 0 24px 80px rgba(0, 0, 0, 0.65);
+      --gsh: 0 0 60px rgba(200, 146, 42, 0.10);
 
-### Manual Verification
-- Clicked the microphone icon and spoke "AWS" (English) and "برمجة" (Arabic).
-- Both queries were correctly transcribed and returned relevant search results.
-- Verified that the pulsing animation correctly indicates the listening state.
+      --r: 16px;
+      --rs: 10px;
+      --rx: 6px;
+    }
 
-## Final Files
-- [saudi-courses-platform.html](file:///c:/Users/Fahad22/Downloads/files/saudi-courses-platform.html)
-- [taqeem-platform.html](file:///c:/Users/Fahad22/Downloads/files/taqeem-platform.html)
-- [taqeem-design-system.html](file:///c:/Users/Fahad22/Downloads/files/taqeem-design-system.html)
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--obsidian);
+      color: var(--t1);
+      overflow-x: hidden;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    body.ar {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    body.ar h1,
+    body.ar h2,
+    body.ar h3,
+    body.ar h4 {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      font-weight: 900
+    }
+
+    body:not(.ar) h1,
+    body:not(.ar) h2,
+    body:not(.ar) h3 {
+      font-family: 'Cormorant Garamond', serif
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--void)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 2px
+    }
+
+    /* ── ISLAMIC STAR PATTERN BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 15% 5%, rgba(200, 146, 42, 0.055) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 80% at 85% 90%, rgba(12, 180, 174, 0.045) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(200, 146, 42, 0.018) 0%, transparent 70%);
+    }
+
+    /* Geometric SVG tile */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .018;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath fill='none' stroke='%23C8922A' stroke-width='.6' d='M40 0 L80 40 L40 80 L0 40Z M40 20 L60 40 L40 60 L20 40Z'/%3E%3C/svg%3E");
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 56px;
+      background: rgba(7, 8, 13, 0.88);
+      backdrop-filter: blur(28px) saturate(1.5);
+      border-bottom: 1px solid var(--b1);
+    }
+
+    nav::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold-ring) 35%, var(--gold-ring) 65%, transparent 100%);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      text-decoration: none
+    }
+
+    .logo-gem {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(140deg, var(--gold-lt) 0%, var(--gold) 55%, #7A4E0A 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--obsidian);
+      font-weight: 700;
+      box-shadow: 0 4px 18px var(--gold-glow);
+      font-family: 'Cormorant Garamond', serif;
+      flex-shrink: 0;
+    }
+
+    .logo-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1px
+    }
+
+    .logo-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--t1);
+      line-height: 1;
+      letter-spacing: -.01em
+    }
+
+    .logo-en span {
+      color: var(--gold-lt)
+    }
+
+    .logo-ar {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      font-size: 12px;
+      color: var(--t3);
+      line-height: 1
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px
+    }
+
+    .nl {
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--t2);
+      cursor: pointer;
+      transition: all .18s;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    .nl:hover {
+      color: var(--t1);
+      background: var(--glass)
+    }
+
+    .nl.on {
+      color: var(--gold-lt);
+      background: var(--gold-fill)
+    }
+
+    .nav-r {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    /* Language Switcher */
+    .ls {
+      display: flex;
+      align-items: center;
+      background: var(--glass);
+      border: 1px solid var(--b1);
+      border-radius: 9px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .lb {
+      padding: 5px 13px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--t3);
+      transition: all .18s;
+      font-family: inherit;
+      letter-spacing: .01em;
+    }
+
+    .lb.on {
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      box-shadow: 0 2px 10px var(--gold-glow);
+    }
+
+    .lb:not(.on):hover {
+      color: var(--t1)
+    }
+
+    .nbell {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      border: 1px solid var(--b1);
+      background: var(--glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      position: relative;
+      transition: all .18s;
+    }
+
+    .nbell:hover {
+      border-color: var(--gold-ring)
+    }
+
+    .nbadge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--crimson);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--obsidian);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      white-space: nowrap;
+      text-decoration: none;
+      line-height: 1
+    }
+
+    .bg {
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      padding: 11px 24px;
+      border-radius: var(--rs);
+      font-size: 14px;
+      box-shadow: 0 4px 18px var(--gold-glow)
+    }
+
+    .bg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px var(--gold-glow);
+      filter: brightness(1.07)
+    }
+
+    .bt {
+      background: linear-gradient(135deg, var(--aqua-lt), var(--aqua));
+      color: var(--obsidian);
+      padding: 11px 24px;
+      border-radius: var(--rs);
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(12, 180, 174, .25)
+    }
+
+    .bt:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(12, 180, 174, .35)
+    }
+
+    .bo {
+      background: transparent;
+      color: var(--t1);
+      padding: 10px 22px;
+      border-radius: var(--rs);
+      font-size: 14px;
+      border: 1px solid var(--b1)
+    }
+
+    .bo:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt)
+    }
+
+    .bgl {
+      background: var(--glass);
+      color: var(--t2);
+      padding: 10px 20px;
+      border-radius: var(--rs);
+      font-size: 14px;
+      border: 1px solid var(--b1)
+    }
+
+    .bgl:hover {
+      background: var(--glass2);
+      color: var(--t1)
+    }
+
+    .bem {
+      background: linear-gradient(135deg, #34D399, var(--emerald));
+      color: var(--obsidian);
+      padding: 11px 24px;
+      border-radius: var(--rs);
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, .25)
+    }
+
+    .bem:hover {
+      transform: translateY(-2px)
+    }
+
+    .sm {
+      padding: 7px 16px;
+      font-size: 13px;
+      border-radius: 8px
+    }
+
+    .lg {
+      padding: 14px 30px;
+      font-size: 15.5px;
+      border-radius: 12px
+    }
+
+    .full {
+      width: 100%;
+      justify-content: center
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      padding-top: 68px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(90px)
+    }
+
+    .orb1 {
+      width: 700px;
+      height: 700px;
+      top: -250px;
+      left: -150px;
+      background: radial-gradient(circle, rgba(200, 146, 42, .07) 0%, transparent 65%);
+      animation: drift 14s ease-in-out infinite alternate
+    }
+
+    .orb2 {
+      width: 500px;
+      height: 500px;
+      bottom: -200px;
+      right: -50px;
+      background: radial-gradient(circle, rgba(12, 180, 174, .06) 0%, transparent 65%);
+      animation: drift 18s ease-in-out infinite alternate-reverse
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(0, 0)
+      }
+
+      100% {
+        transform: translate(28px, 20px)
+      }
+    }
+
+    @keyframes fup {
+      from {
+        opacity: 0;
+        transform: translateY(22px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(.45);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    @keyframes pulseDot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .3;
+        transform: scale(.75)
+      }
+    }
+
+    .hl {
+      padding: 80px 56px 80px 80px;
+      position: relative;
+      z-index: 1
+    }
+
+    .heyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 17px;
+      border-radius: 100px;
+      background: var(--gold-fill);
+      border: 1px solid var(--gold-ring);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gold-pale);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      animation: fup .6s ease both;
+    }
+
+    .heyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold-lt);
+      animation: pulseDot 2s infinite
+    }
+
+    .hero h1 {
+      font-size: clamp(38px, 5.8vw, 76px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      margin-bottom: 22px;
+      color: var(--t1);
+      animation: fup .6s .1s ease both;
+    }
+
+    .hero h1 .ag {
+      color: var(--gold-lt);
+      font-style: italic
+    }
+
+    .hero h1 .aq {
+      color: var(--aqua-lt)
+    }
+
+    .hsub {
+      font-size: 17px;
+      color: var(--t2);
+      line-height: 1.7;
+      max-width: 500px;
+      margin-bottom: 42px;
+      font-weight: 400;
+      animation: fup .6s .2s ease both
+    }
+
+    .hacts {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 52px;
+      animation: fup .6s .3s ease both
+    }
+
+    .htrust {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 15px 20px;
+      background: var(--glass);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      backdrop-filter: blur(12px);
+      width: fit-content;
+      animation: fup .6s .4s ease both;
+    }
+
+    .tavs {
+      display: flex
+    }
+
+    .tav {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid var(--surface);
+      margin-left: -7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--obsidian);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .tav:first-child {
+      margin-left: 0
+    }
+
+    .tdiv {
+      width: 1px;
+      height: 26px;
+      background: var(--b1)
+    }
+
+    .ttxt {
+      font-size: 13px;
+      color: var(--t2)
+    }
+
+    .ttxt strong {
+      color: var(--t1)
+    }
+
+    .trat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .tstars {
+      color: var(--gold-lt);
+      font-size: 13px;
+      letter-spacing: -1px
+    }
+
+    .trate {
+      font-size: 11px;
+      color: var(--t3)
+    }
+
+    .hr {
+      padding: 80px 80px 80px 44px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px
+    }
+
+    .sc {
+      background: rgba(20, 21, 32, .8);
+      border: 1px solid var(--b1);
+      border-radius: 20px;
+      padding: 26px;
+      backdrop-filter: blur(24px);
+      box-shadow: var(--sh2);
+    }
+
+    .sc-t {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--t1);
+      margin-bottom: 16px
+    }
+
+    .sw {
+      display: flex;
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid var(--b1);
+      border-radius: var(--rs);
+      overflow: visible;
+      margin-bottom: 14px;
+      position: relative;
+      transition: border-color .15s;
+    }
+
+    .sw:focus-within {
+      border-color: var(--gold-ring)
+    }
+
+    .sw input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 13px 16px;
+      color: var(--t1);
+      font-size: 14px;
+      font-family: inherit
+    }
+
+    .sw input::placeholder {
+      color: var(--t3)
+    }
+
+    .sw select {
+      background: rgba(255, 255, 255, .04);
+      border: none;
+      border-left: 1px solid var(--b1);
+      outline: none;
+      padding: 0 14px;
+      color: var(--t2);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer
+    }
+
+    .sw select option {
+      background: var(--surface)
+    }
+
+    .sw button {
+      padding: 0 18px;
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      border: none;
+      color: var(--obsidian);
+      font-size: 17px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: filter .15s
+    }
+
+    .sw button:hover {
+      filter: brightness(1.12)
+    }
+
+    .mic-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--t3);
+      transition: all .2s;
+    }
+
+    .mic-btn:hover {
+      color: var(--gold-lt);
+    }
+
+    .mic-btn.listening {
+      color: var(--crimson);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .sdrop {
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--gold-ring);
+      border-radius: var(--rs);
+      z-index: 200;
+      overflow: hidden;
+      box-shadow: var(--sh2);
+      display: none;
+    }
+
+    .sdrop.open {
+      display: block
+    }
+
+    .si {
+      padding: 11px 16px;
+      font-size: 14px;
+      color: var(--t2);
+      cursor: pointer;
+      transition: all .12s;
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .si:hover {
+      background: var(--gold-fill);
+      color: var(--gold-lt)
+    }
+
+    .si::before {
+      content: '⌕';
+      font-size: 13px;
+      opacity: .4
+    }
+
+    .qtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px
+    }
+
+    .qt {
+      padding: 5px 13px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--glass);
+      border: 1px solid var(--b1);
+      color: var(--t2);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .qt:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt);
+      background: var(--gold-fill)
+    }
+
+    .smini {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--glass);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+
+    .smi {
+      padding: 16px;
+      text-align: center;
+      border-right: 1px solid var(--b1)
+    }
+
+    .smi:last-child {
+      border-right: none
+    }
+
+    .smin {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gold-lt)
+    }
+
+    body.ar .smin {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .smil {
+      font-size: 11px;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-top: 3px
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      padding: 80px 80px;
+      position: relative;
+      z-index: 1
+    }
+
+    .ey {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-family: 'DM Sans', sans-serif
+    }
+
+    body.ar .ey {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .st {
+      font-size: clamp(26px, 3.5vw, 44px);
+      font-weight: 700;
+      color: var(--t1);
+      margin-bottom: 10px
+    }
+
+    .ss {
+      font-size: 16px;
+      color: var(--t2);
+      line-height: 1.65;
+      max-width: 520px
+    }
+
+    .sh {
+      margin-bottom: 48px
+    }
+
+    .shc {
+      text-align: center
+    }
+
+    .shc .ss {
+      margin: 0 auto
+    }
+
+    .btwn {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px
+    }
+
+    .sdiv {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--b1) 20%, var(--b1) 80%, transparent);
+      margin: 0
+    }
+
+    /* ─── FILTER BAR ─── */
+    .fbar {
+      background: rgba(20, 21, 32, .9);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      padding: 15px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 11px;
+      flex-wrap: wrap;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--sh1);
+    }
+
+    .fl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--t3);
+      font-weight: 600
+    }
+
+    .chip {
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--b1);
+      cursor: pointer;
+      transition: all .15s;
+      background: var(--glass);
+      color: var(--t2);
+      font-family: inherit;
+    }
+
+    .chip:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt)
+    }
+
+    .chip.on {
+      background: var(--gold-fill);
+      border-color: var(--gold-ring);
+      color: var(--gold-lt);
+      font-weight: 600
+    }
+
+    .dv {
+      width: 1px;
+      height: 22px;
+      background: var(--b1)
+    }
+
+    .rw {
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .rw input[type=range] {
+      width: 120px;
+      accent-color: var(--gold);
+      cursor: pointer
+    }
+
+    .rv {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold-lt);
+      min-width: 70px
+    }
+
+    .fsel {
+      margin-left: auto;
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--b1);
+      background: var(--glass);
+      color: var(--t2);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .fsel:focus {
+      border-color: var(--gold-ring)
+    }
+
+    .fsel option {
+      background: var(--surface)
+    }
+
+    [dir=rtl] .fsel {
+      margin-left: 0;
+      margin-right: auto
+    }
+
+    /* ─── TABS ─── */
+    .tabrow {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, .3);
+      padding: 4px;
+      border-radius: 12px;
+      width: fit-content;
+      margin-bottom: 28px;
+      border: 1px solid var(--b1);
+    }
+
+    .tab {
+      padding: 8px 20px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--t3);
+      font-family: inherit;
+      transition: all .18s;
+    }
+
+    .tab:hover {
+      color: var(--t1)
+    }
+
+    .tab.on {
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      box-shadow: 0 3px 14px var(--gold-glow)
+    }
+
+    /* ─── COURSE CARDS ─── */
+    .g3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(296px, 1fr));
+      gap: 20px
+    }
+
+    .cc {
+      background: var(--card);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all .22s;
+      position: relative;
+      box-shadow: var(--sh1);
+    }
+
+    .cc:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold-ring);
+      box-shadow: var(--sh2), var(--gsh)
+    }
+
+    .cc.cmpon {
+      border-color: rgba(59, 130, 246, .5);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, .4)
+    }
+
+    .cth {
+      height: 155px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden
+    }
+
+    .cthi {
+      font-size: 58px;
+      z-index: 1;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .4))
+    }
+
+    .cthb {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 45%, var(--card))
+    }
+
+    .ttag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    [dir=rtl] .ttag {
+      left: auto;
+      right: 12px
+    }
+
+    .ttag.free {
+      background: var(--emerald);
+      color: var(--obsidian)
+    }
+
+    .ttag.paid {
+      background: var(--gold);
+      color: var(--obsidian)
+    }
+
+    .ttag.scholarship {
+      background: var(--cobalt);
+      color: #fff
+    }
+
+    .dtag {
+      position: absolute;
+      top: 12px;
+      right: 44px;
+      z-index: 2;
+      background: var(--crimson);
+      color: #fff;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    [dir=rtl] .dtag {
+      right: auto;
+      left: 44px
+    }
+
+    .wbtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--b1);
+      background: rgba(7, 8, 13, .75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all .15s;
+      backdrop-filter: blur(6px);
+    }
+
+    [dir=rtl] .wbtn {
+      right: auto;
+      left: 10px
+    }
+
+    .wbtn:hover {
+      border-color: var(--crimson);
+      transform: scale(1.12)
+    }
+
+    .wbtn.sv {
+      background: var(--crimson-d);
+      border-color: var(--crimson)
+    }
+
+    .cmpbtn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      border: 1px solid var(--b1);
+      background: rgba(7, 8, 13, .75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--t3);
+    }
+
+    [dir=rtl] .cmpbtn {
+      right: auto;
+      left: 10px
+    }
+
+    .cmpbtn:hover {
+      border-color: rgba(59, 130, 246, .5);
+      color: var(--cobalt)
+    }
+
+    .cmpbtn.on {
+      background: var(--cobalt-d);
+      border-color: rgba(59, 130, 246, .5);
+      color: var(--cobalt)
+    }
+
+    .cb {
+      padding: 15px 17px 17px
+    }
+
+    .cac {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 5px
+    }
+
+    .ct {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      color: var(--t1)
+    }
+
+    .cm {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px
+    }
+
+    .cm span {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    .cm b {
+      color: var(--t2);
+      font-weight: 500
+    }
+
+    .ctgs {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 13px
+    }
+
+    .ctg {
+      padding: 2px 9px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--glass);
+      color: var(--t3);
+      border: 1px solid var(--b1)
+    }
+
+    .ctg.hot {
+      background: var(--amber-d);
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, .25)
+    }
+
+    .ctg.new {
+      background: var(--aqua-dim);
+      color: var(--aqua-lt);
+      border-color: var(--aqua-ring)
+    }
+
+    .ctg.certified {
+      background: var(--emerald-d);
+      color: var(--emerald);
+      border-color: var(--emerald-r)
+    }
+
+    .ctg.scholarship {
+      background: var(--cobalt-d);
+      color: var(--cobalt);
+      border-color: rgba(59, 130, 246, .25)
+    }
+
+    .cstars {
+      color: var(--gold-lt);
+      font-size: 12px;
+      letter-spacing: -1px
+    }
+
+    .cft {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--b1);
+      padding-top: 13px
+    }
+
+    .pbox {
+      display: flex;
+      align-items: baseline;
+      gap: 7px
+    }
+
+    .pnow {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--t1)
+    }
+
+    body.ar .pnow {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      font-size: 17px
+    }
+
+    .pnow.fr {
+      color: var(--emerald)
+    }
+
+    .pold {
+      font-size: 12px;
+      color: var(--t3);
+      text-decoration: line-through
+    }
+
+    .ddl {
+      font-size: 11px;
+      color: var(--crimson);
+      font-weight: 600;
+      margin-top: 2px
+    }
+
+    .ebtn {
+      padding: 8px 17px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: all .18s
+    }
+
+    .epaid {
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      box-shadow: 0 3px 12px var(--gold-glow)
+    }
+
+    .epaid:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 18px var(--gold-glow)
+    }
+
+    .efree {
+      background: var(--emerald-d);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-r) !important
+    }
+
+    .efree:hover {
+      background: rgba(34, 197, 94, .18)
+    }
+
+    /* ─── CATEGORIES ─── */
+    .catbg {
+      background: var(--deep)
+    }
+
+    .catg {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(162px, 1fr));
+      gap: 14px
+    }
+
+    .catc {
+      background: var(--card);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .catc:hover {
+      border-color: var(--gold-ring);
+      transform: translateY(-3px);
+      box-shadow: var(--sh2)
+    }
+
+    .cico {
+      font-size: 30px;
+      margin-bottom: 10px
+    }
+
+    .cnam {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--t1);
+      margin-bottom: 4px
+    }
+
+    .ccnt {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    /* ─── COMPARE BAR ─── */
+    .cbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 800;
+      background: rgba(11, 12, 20, .96);
+      border-top: 1px solid var(--gold-ring);
+      backdrop-filter: blur(24px);
+      padding: 13px 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transform: translateY(100%);
+      transition: transform .3s ease;
+    }
+
+    .cbar.show {
+      transform: none
+    }
+
+    .cbt {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-lt);
+      white-space: nowrap
+    }
+
+    .cslots {
+      display: flex;
+      gap: 10px;
+      flex: 1
+    }
+
+    .csl {
+      flex: 1;
+      max-width: 220px;
+      padding: 9px 14px;
+      border-radius: 9px;
+      border: 1px dashed var(--b1);
+      font-size: 13px;
+      color: var(--t3);
+      position: relative;
+    }
+
+    .csl.filled {
+      border-color: var(--gold-ring);
+      color: var(--t1);
+      background: var(--gold-fill)
+    }
+
+    .csl .rm {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--t3);
+      font-size: 12px
+    }
+
+    [dir=rtl] .csl .rm {
+      right: auto;
+      left: 9px
+    }
+
+    .csl .rm:hover {
+      color: var(--t1)
+    }
+
+    /* ─── MODALS ─── */
+    .ov {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(7, 8, 13, .78);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    .ov.open {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--b1);
+      border-radius: 22px;
+      box-shadow: var(--sh3);
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      transform: translateY(18px) scale(.97);
+      transition: transform .28s;
+      padding: 34px;
+      position: relative;
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-ring), transparent);
+      border-radius: 22px 22px 0 0;
+    }
+
+    .ov.open .modal {
+      transform: none
+    }
+
+    .msm {
+      max-width: 440px
+    }
+
+    .mmd {
+      max-width: 510px
+    }
+
+    .mlg {
+      max-width: 880px
+    }
+
+    .mhd {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 26px
+    }
+
+    .mhd h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--t1)
+    }
+
+    body.ar .mhd h2 {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .xbtn {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      border: 1px solid var(--b1);
+      background: var(--glass);
+      color: var(--t3);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+
+    .xbtn:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt)
+    }
+
+    /* ─── AUTH MODAL ─── */
+    .atabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, .3);
+      padding: 4px;
+      border-radius: 11px;
+      margin-bottom: 20px;
+      border: 1px solid var(--b1);
+    }
+
+    .atab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--t3);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    .atab.on {
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      box-shadow: 0 3px 12px var(--gold-glow)
+    }
+
+    .fnote {
+      background: var(--emerald-d);
+      border: 1px solid var(--emerald-r);
+      border-radius: var(--rs);
+      padding: 13px 15px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+    }
+
+    .fnote p {
+      font-size: 13px;
+      color: #86EFAC;
+      line-height: 1.55
+    }
+
+    .fnote strong {
+      color: #4ADE80;
+      font-weight: 700
+    }
+
+    .fgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .f {
+      margin-bottom: 14px
+    }
+
+    .f label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px
+    }
+
+    .f input,
+    .f select {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: var(--rs);
+      border: 1px solid var(--b1);
+      background: rgba(0, 0, 0, .3);
+      color: var(--t1);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .f input:focus,
+    .f select:focus {
+      border-color: var(--gold-ring);
+      background: rgba(0, 0, 0, .4)
+    }
+
+    .f input::placeholder {
+      color: var(--t3)
+    }
+
+    .f select option {
+      background: var(--surface)
+    }
+
+    .adiv {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0
+    }
+
+    .adiv::before,
+    .adiv::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--b1)
+    }
+
+    .adiv span {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    .sgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px
+    }
+
+    .sbtn {
+      padding: 10px;
+      border-radius: var(--rs);
+      border: 1px solid var(--b1);
+      background: var(--glass);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-family: inherit;
+      color: var(--t2);
+      transition: all .15s;
+    }
+
+    .sbtn:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt);
+      background: var(--gold-fill)
+    }
+
+    .anote {
+      font-size: 12px;
+      color: var(--t3);
+      text-align: center;
+      margin-top: 12px
+    }
+
+    .anote a {
+      color: var(--gold-lt);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600
+    }
+
+    /* ─── PAYMENT MODAL ─── */
+    .playout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px
+    }
+
+    .pright {
+      background: rgba(0, 0, 0, .25);
+      border-radius: var(--r);
+      padding: 20px;
+      border: 1px solid var(--b1)
+    }
+
+    .cprev {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      padding: 14px;
+      background: var(--glass);
+      border-radius: var(--rs);
+      border: 1px solid var(--b1);
+      margin-bottom: 18px
+    }
+
+    .cpico {
+      font-size: 30px;
+      width: 52px;
+      height: 52px;
+      background: var(--gold-fill);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .cpname {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--t1);
+      line-height: 1.3;
+      margin-bottom: 3px
+    }
+
+    .cpac {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    .orow {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--b1);
+      font-size: 14px
+    }
+
+    .orow:last-of-type {
+      border-bottom: none
+    }
+
+    .orow span:first-child {
+      color: var(--t3)
+    }
+
+    .orow.disc span:last-child {
+      color: var(--emerald);
+      font-weight: 600
+    }
+
+    .otot {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold-lt);
+      padding-top: 10px;
+      margin-top: 4px;
+      border-top: 1px solid var(--gold-ring);
+      display: flex;
+      justify-content: space-between
+    }
+
+    .pmg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 15px
+    }
+
+    .pmc {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--b1);
+      cursor: pointer;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all .15s;
+      background: var(--glass);
+      color: var(--t3);
+      font-family: inherit;
+    }
+
+    .pmc:hover {
+      border-color: var(--gold-ring);
+      color: var(--gold-lt)
+    }
+
+    .pmc.on {
+      border-color: var(--gold-ring);
+      background: var(--gold-fill);
+      color: var(--gold-lt)
+    }
+
+    .pmico {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 5px
+    }
+
+    .pmf {
+      display: none
+    }
+
+    .pmf.show {
+      display: block
+    }
+
+    .psec {
+      font-size: 11px;
+      color: var(--t3);
+      text-align: center;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px
+    }
+
+    /* Free enrollment box */
+    .febox {
+      background: var(--emerald-d);
+      border: 1px solid var(--emerald-r);
+      border-radius: var(--r);
+      padding: 22px;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .feico {
+      font-size: 38px;
+      margin-bottom: 10px
+    }
+
+    .fetit {
+      font-size: 17px;
+      font-weight: 700;
+      color: #4ADE80;
+      margin-bottom: 6px
+    }
+
+    body.ar .fetit {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .fesub {
+      font-size: 13px;
+      color: #86EFAC;
+      line-height: 1.55
+    }
+
+    /* ─── SUCCESS ─── */
+    .sucwrap {
+      text-align: center;
+      padding: 10px 0
+    }
+
+    .sucico {
+      font-size: 70px;
+      margin-bottom: 16px;
+      animation: popIn .4s cubic-bezier(.36, 1.6, .64, 1) both
+    }
+
+    .sucwrap h2 {
+      font-size: 27px;
+      font-weight: 700;
+      margin-bottom: 10px
+    }
+
+    body.ar .sucwrap h2 {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .sucwrap p {
+      color: var(--t2);
+      font-size: 14.5px;
+      line-height: 1.6
+    }
+
+    .succn {
+      font-weight: 700;
+      color: var(--gold-lt)
+    }
+
+    .succonf {
+      font-size: 13px;
+      color: var(--emerald);
+      font-weight: 600;
+      margin-top: 10px
+    }
+
+    /* ─── COMPARE TABLE ─── */
+    .ctbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px
+    }
+
+    .ctbl th {
+      background: var(--gold-fill);
+      padding: 13px 15px;
+      font-weight: 700;
+      color: var(--gold-lt);
+      text-align: left;
+      border-bottom: 1px solid var(--gold-ring)
+    }
+
+    [dir=rtl] .ctbl th {
+      text-align: right
+    }
+
+    .ctbl th:first-child {
+      color: var(--t3);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-weight: 600;
+      width: 130px
+    }
+
+    .ctbl td {
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--b1);
+      color: var(--t2)
+    }
+
+    .ctbl td:first-child {
+      color: var(--t3);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-weight: 600
+    }
+
+    .ctbl tr:hover td {
+      background: var(--glass)
+    }
+
+    .ctbl tr:last-child td {
+      border-bottom: none
+    }
+
+    /* ─── ADMIN ─── */
+    .admbg {
+      background: var(--deep)
+    }
+
+    .admlayout {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--b1);
+      box-shadow: var(--sh2);
+    }
+
+    .admnav {
+      background: var(--surface);
+      border-right: 1px solid var(--b1);
+      padding: 14px 0
+    }
+
+    [dir=rtl] .admnav {
+      border-right: none;
+      border-left: 1px solid var(--b1)
+    }
+
+    .admi {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 17px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--t3);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    [dir=rtl] .admi {
+      text-align: right
+    }
+
+    .admi:hover {
+      background: var(--glass);
+      color: var(--t1)
+    }
+
+    .admi.on {
+      background: var(--gold-fill);
+      color: var(--gold-lt);
+      font-weight: 700;
+      border-right: 2px solid var(--gold)
+    }
+
+    [dir=rtl] .admi.on {
+      border-right: none;
+      border-left: 2px solid var(--gold)
+    }
+
+    .admbody {
+      background: var(--card);
+      padding: 28px
+    }
+
+    .admtit {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      color: var(--t1)
+    }
+
+    body.ar .admtit {
+      font-family: 'Noto Kufi Arabic', sans-serif
+    }
+
+    .krow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px
+    }
+
+    .kpi {
+      background: var(--surface);
+      border-radius: var(--rs);
+      padding: 17px;
+      border: 1px solid var(--b1)
+    }
+
+    .kl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--t3);
+      font-weight: 600;
+      margin-bottom: 6px
+    }
+
+    .kv {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--t1)
+    }
+
+    body.ar .kv {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      font-size: 22px
+    }
+
+    .kd {
+      font-size: 12px;
+      margin-top: 4px;
+      font-weight: 600
+    }
+
+    .kd.up {
+      color: var(--emerald)
+    }
+
+    .kd.dn {
+      color: var(--crimson)
+    }
+
+    .chbox {
+      background: var(--surface);
+      border-radius: var(--rs);
+      border: 1px solid var(--b1);
+      padding: 20px
+    }
+
+    .cht {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--t1)
+    }
+
+    .brow {
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+      height: 100px
+    }
+
+    .bc {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px
+    }
+
+    .b {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      transition: .3s;
+      cursor: pointer
+    }
+
+    .b:hover {
+      filter: brightness(1.25)
+    }
+
+    .bl {
+      font-size: 10px;
+      color: var(--t3)
+    }
+
+    /* ─── REVIEWS ─── */
+    .rvbg {
+      background: var(--deep)
+    }
+
+    .rvg {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+      gap: 15px
+    }
+
+    .rvc {
+      background: var(--card);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      padding: 20px;
+      transition: all .2s
+    }
+
+    .rvc:hover {
+      border-color: var(--gold-ring);
+      transform: translateY(-2px)
+    }
+
+    .rvhd {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 11px
+    }
+
+    .rvav {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0
+    }
+
+    .rvn {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--t1)
+    }
+
+    .rvm {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    .rvs {
+      color: var(--gold-lt);
+      font-size: 13px;
+      letter-spacing: -1px;
+      margin-bottom: 8px
+    }
+
+    .rvt {
+      font-size: 13.5px;
+      color: var(--t2);
+      line-height: 1.65
+    }
+
+    /* ─── PLANS ─── */
+    .plbg {
+      background: var(--void)
+    }
+
+    .plng {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px
+    }
+
+    .plnc {
+      border-radius: 20px;
+      border: 1px solid var(--b1);
+      padding: 28px;
+      background: var(--card);
+      transition: all .22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plnc::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--b1), transparent)
+    }
+
+    .plnc:hover {
+      border-color: var(--gold-ring);
+      box-shadow: var(--sh2)
+    }
+
+    .plnc.feat {
+      background: linear-gradient(165deg, rgba(200, 146, 42, .14) 0%, var(--card) 55%);
+      border-color: var(--gold-ring)
+    }
+
+    .plnc.feat::before {
+      background: linear-gradient(90deg, transparent, var(--gold-ring), transparent)
+    }
+
+    .plbadge {
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      padding: 4px 18px;
+      border-radius: 0 0 10px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .plnn {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--t3);
+      font-weight: 700;
+      margin-bottom: 9px
+    }
+
+    .plnp {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--t1);
+      margin-bottom: 3px
+    }
+
+    body.ar .plnp {
+      font-family: 'Noto Kufi Arabic', sans-serif;
+      font-size: 30px
+    }
+
+    .plnper {
+      font-size: 13px;
+      color: var(--t3);
+      margin-bottom: 22px
+    }
+
+    .plnfs {
+      list-style: none;
+      margin-bottom: 24px
+    }
+
+    .plnfs li {
+      font-size: 13.5px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--b1);
+      display: flex;
+      gap: 8px;
+      color: var(--t2);
+      line-height: 1.4
+    }
+
+    .plnc.feat .plnfs li {
+      color: var(--t1);
+      border-bottom-color: rgba(255, 255, 255, .07)
+    }
+
+    .plnfs li::before {
+      content: '✦';
+      color: var(--gold);
+      font-size: 10px;
+      margin-top: 2px;
+      flex-shrink: 0
+    }
+
+    /* ─── ARCH ─── */
+    .arcbg {
+      background: var(--void)
+    }
+
+    .arcg {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px
+    }
+
+    .arcc {
+      background: var(--card);
+      border: 1px solid var(--b1);
+      border-radius: var(--r);
+      padding: 22px;
+      transition: all .2s
+    }
+
+    .arcc:hover {
+      border-color: var(--aqua-ring);
+      transform: translateY(-3px);
+      box-shadow: var(--sh2)
+    }
+
+    .arcico {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      background: var(--aqua-dim);
+      border: 1px solid var(--aqua-ring);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 12px
+    }
+
+    .arct {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--t1)
+    }
+
+    .arcd {
+      font-size: 13px;
+      color: var(--t3);
+      line-height: 1.65;
+      margin-bottom: 11px
+    }
+
+    .tpills {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap
+    }
+
+    .tp {
+      padding: 2px 9px;
+      border-radius: 100px;
+      background: var(--aqua-dim);
+      color: var(--aqua-lt);
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid var(--aqua-ring)
+    }
+
+    /* ─── NOTIF PANEL ─── */
+    .np {
+      position: fixed;
+      top: 76px;
+      right: 40px;
+      z-index: 1000;
+      width: 310px;
+      background: var(--surface);
+      border: 1px solid var(--b1);
+      border-radius: 18px;
+      box-shadow: var(--sh3);
+      transform: translateX(360px) scale(.95);
+      transition: transform .3s, opacity .3s;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    [dir=rtl] .np {
+      right: auto;
+      left: 40px;
+      transform: translateX(-360px) scale(.95)
+    }
+
+    .np::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-ring), transparent)
+    }
+
+    .np.open {
+      transform: none;
+      opacity: 1
+    }
+
+    .nphd {
+      padding: 15px 17px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--b1)
+    }
+
+    .nphd h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--t1)
+    }
+
+    .ni {
+      padding: 12px 17px;
+      border-bottom: 1px solid var(--b1);
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    .ni:hover {
+      background: var(--glass)
+    }
+
+    .ni:last-child {
+      border-bottom: none
+    }
+
+    .ni.urg {
+      border-left: 3px solid var(--crimson)
+    }
+
+    .ni.inf {
+      border-left: 3px solid var(--aqua)
+    }
+
+    [dir=rtl] .ni.urg {
+      border-left: none;
+      border-right: 3px solid var(--crimson)
+    }
+
+    [dir=rtl] .ni.inf {
+      border-left: none;
+      border-right: 3px solid var(--aqua)
+    }
+
+    .nit {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--t1);
+      margin-bottom: 3px
+    }
+
+    .nis {
+      font-size: 12px;
+      color: var(--t3)
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--deep);
+      border-top: 1px solid var(--b1);
+      padding: 58px 80px 30px;
+      position: relative;
+      z-index: 1
+    }
+
+    .fg {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 52px;
+      margin-bottom: 42px
+    }
+
+    .fc h5 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--t1);
+      font-weight: 700;
+      margin-bottom: 14px
+    }
+
+    .fc p {
+      font-size: 13px;
+      color: var(--t3);
+      line-height: 1.7
+    }
+
+    .fc ul {
+      list-style: none
+    }
+
+    .fc ul li {
+      margin-bottom: 8px
+    }
+
+    .fc ul li a {
+      font-size: 13px;
+      color: var(--t3);
+      text-decoration: none;
+      transition: color .15s
+    }
+
+    .fc ul li a:hover {
+      color: var(--gold-lt)
+    }
+
+    .fb {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--t3);
+      padding-top: 22px;
+      border-top: 1px solid var(--b1)
+    }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--card2);
+      color: var(--t1);
+      padding: 11px 22px;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 2000;
+      opacity: 0;
+      transition: all .25s;
+      pointer-events: none;
+      box-shadow: var(--sh3);
+      white-space: nowrap;
+      border: 1px solid var(--b1);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* ─── REVEAL ─── */
+    .rev {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s, transform .6s
+    }
+
+    .rev.in {
+      opacity: 1;
+      transform: none
+    }
+
+    /* ─── USER PILL ─── */
+    .upill {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .uav {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+      color: var(--obsidian);
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      box-shadow: 0 3px 12px var(--gold-glow)
+    }
+
+    .uname {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--t1)
+    }
+
+    .sout {
+      font-size: 12px;
+      color: var(--t3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit
+    }
+
+    .sout:hover {
+      color: var(--crimson)
+    }
+
+    @media(max-width:960px) {
+      nav {
+        padding: 0 20px
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .hero {
+        grid-template-columns: 1fr
+      }
+
+      .hr {
+        display: none
+      }
+
+      .hl {
+        padding: 56px 24px
+      }
+
+      section {
+        padding: 50px 24px
+      }
+
+      .plng {
+        grid-template-columns: 1fr
+      }
+
+      .playout {
+        grid-template-columns: 1fr
+      }
+
+      .krow {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .admlayout {
+        grid-template-columns: 1fr
+      }
+
+      .fg {
+        grid-template-columns: 1fr 1fr
+      }
+
+      footer {
+        padding: 40px 24px 22px
+      }
+
+      .arcg {
+        grid-template-columns: 1fr
+      }
+
+      .fgrid {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ NAV ══ -->
+  <nav id="nav">
+    <a class="logo" onclick="scrollTo({top:0,behavior:'smooth'})">
+      <div class="logo-gem">T</div>
+      <div class="logo-stack">
+        <div class="logo-en">Taqeem<span>.</span></div>
+        <div class="logo-ar">تقييم</div>
+      </div>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <button class="nl on" onclick="gos('courses')" data-k="nCourses">Courses</button>
+      <button class="nl" onclick="gos('cats')" data-k="nCats">Categories</button>
+      <button class="nl" onclick="gos('recs')" data-k="nForYou">For You</button>
+      <button class="nl" onclick="gos('plans')" data-k="nPlans">Plans</button>
+      <button class="nl" onclick="gos('admin')" data-k="nDash">Dashboard</button>
+    </div>
+
+    <div class="nav-r" id="navR">
+      <div class="ls">
+        <button class="lb on" id="lEN" onclick="setLang('en')">EN</button>
+        <button class="lb" id="lAR" onclick="setLang('ar')">عربي</button>
+      </div>
+      <div class="nbell" onclick="togNotif()" id="nbell">🔔<div class="nbadge">3</div>
+      </div>
+      <button class="btn bgl sm" onclick="openAuth('login')" data-k="btnIn">Sign In</button>
+      <button class="btn bg sm" onclick="openAuth('reg')" data-k="btnJoin">Join Free</button>
+    </div>
+  </nav>
+
+  <!-- ══ NOTIF PANEL ══ -->
+  <div class="np" id="notifP">
+    <div class="nphd">
+      <h4 data-k="notifTitle">Notifications</h4>
+      <button class="xbtn" onclick="togNotif()">✕</button>
+    </div>
+    <div class="ni urg">
+      <div class="nit">⚡ <span data-k="n1t">Free Course Ending Soon</span></div>
+      <div class="nis" data-k="n1s">AWS Cloud Practitioner — closes in 48h</div>
+    </div>
+    <div class="ni urg">
+      <div class="nit">🏷️ <span data-k="n2t">Price Drop Alert</span></div>
+      <div class="nis" data-k="n2s">Data Science Bootcamp — now SAR 149 (was 380)</div>
+    </div>
+    <div class="ni inf">
+      <div class="nit">🎓 <span data-k="n3t">Scholarship Available</span></div>
+      <div class="nis" data-k="n3s">Misk Foundation — Full-stack Development</div>
+    </div>
+    <div class="ni">
+      <div class="nit">✅ <span data-k="n4t">Certificate Ready</span></div>
+      <div class="nis" data-k="n4s">UI/UX Design — download your certificate</div>
+    </div>
+  </div>
+
+  <!-- ══ HERO ══ -->
+  <div class="hero" id="top">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div class="hl">
+      <div class="heyebrow">
+        <div class="heyebrow-dot"></div>
+        <span data-k="heroBadge">🇸🇦 Saudi Arabia's Premier Course Hub</span>
+      </div>
+      <h1>
+        <span data-k="h1a">Learn</span> <span class="ag" data-k="h1b">anything.</span><br>
+        <span data-k="h1c">Pay only</span> <span class="aq" data-k="h1d">when needed.</span>
+      </h1>
+      <p class="hsub" data-k="heroSub">Browse 12,000+ courses from Saudi Arabia's top academies. Platform registration
+        is always free — you only pay for courses that cost something.</p>
+      <div class="hacts">
+        <button class="btn bg lg" onclick="gos('courses')" data-k="heroCta1">Explore Courses →</button>
+        <button class="btn bo lg" onclick="openAuth('reg')" data-k="heroCta2">Join Free — No Card</button>
+      </div>
+      <div class="htrust">
+        <div class="tavs">
+          <div class="tav" style="background:#C8922A">م</div>
+          <div class="tav" style="background:#0CB4AE">س</div>
+          <div class="tav" style="background:#3B82F6">أ</div>
+          <div class="tav" style="background:#22C55E">ف</div>
+        </div>
+        <div class="tdiv"></div>
+        <div class="ttxt"><strong>98,000+</strong> <span data-k="trustL">learners in the Kingdom</span></div>
+        <div class="tdiv"></div>
+        <div class="trat">
+          <div class="tstars">★★★★★</div>
+          <div class="trate" data-k="trustR">4.9 avg. rating</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr">
+      <div class="sc">
+        <div class="sc-t" data-k="searchTitle">Find your next course</div>
+        <div style="position:relative">
+          <div class="sw">
+            <input type="text" id="heroIn" autocomplete="off" oninput="showSugg(this.value)"
+              onfocus="showSugg(this.value)" onblur="setTimeout(hideSugg,160)">
+            <button class="mic-btn" id="micBtn" onclick="startVoiceSearch()" title="Voice Search">🎤</button>
+            <select id="catSel"></select>
+            <button onclick="doSearch()">→</button>
+          </div>
+          <div class="sdrop" id="suggDrop"></div>
+        </div>
+        <div class="qtags" id="qTags"></div>
+      </div>
+      <div class="smini">
+        <div class="smi">
+          <div class="smin" id="cC">0</div>
+          <div class="smil" data-k="sCourses">Courses</div>
+        </div>
+        <div class="smi">
+          <div class="smin" id="cF">0</div>
+          <div class="smil" data-k="sFree">Free</div>
+        </div>
+        <div class="smi">
+          <div class="smin" id="cA">0</div>
+          <div class="smil" data-k="sAcad">Academies</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COURSES ══ -->
+  <div class="sdiv"></div>
+  <section id="courses">
+    <div class="sh btwn rev">
+      <div>
+        <div class="ey" data-k="secCrsEy">Course Catalog</div>
+        <h2 class="st" data-k="secCrsT">Find Your Next Course</h2>
+        <p class="ss" data-k="secCrsS">Free and paid courses from Saudi Arabia's leading academies.</p>
+      </div>
+      <button class="btn bo sm" onclick="openCmpModal()" id="cmpTrig" style="display:none" data-k="btnCmp">Compare
+        Selected →</button>
+    </div>
+
+    <div class="tabrow rev" id="typeTabs">
+      <button class="tab on" onclick="setTyp('all',this)" data-k="tabAll">All Courses</button>
+      <button class="tab" onclick="setTyp('free',this)" data-k="tabFree">Free Only</button>
+      <button class="tab" onclick="setTyp('paid',this)" data-k="tabPaid">Paid Only</button>
+      <button class="tab" onclick="setTyp('sch',this)" data-k="tabSch">Scholarships</button>
+    </div>
+
+    <div class="fbar rev">
+      <span class="fl" data-k="fCat">Category</span>
+      <button class="chip on" onclick="setChip(this)" data-k="chAll">All</button>
+      <button class="chip" onclick="setChip(this)" data-k="chTech">Tech</button>
+      <button class="chip" onclick="setChip(this)" data-k="chBiz">Business</button>
+      <button class="chip" onclick="setChip(this)" data-k="chDes">Design</button>
+      <button class="chip" onclick="setChip(this)" data-k="chDat">Data</button>
+      <div class="dv"></div>
+      <span class="fl" data-k="fPrice">Max Price</span>
+      <div class="rw">
+        <input type="range" min="0" max="1000" value="1000" id="pSlider" oninput="upPrice(this.value)">
+        <span class="rv" id="pVal">—</span>
+      </div>
+      <select class="fsel" id="sortSel" onchange="setSrt(this.value)"></select>
+    </div>
+
+    <div class="g3 rev" id="courseGrid"></div>
+  </section>
+
+  <!-- ══ CATEGORIES ══ -->
+  <div class="sdiv"></div>
+  <section class="catbg" id="cats">
+    <div class="sh shc rev">
+      <div class="ey" data-k="secCatEy">Browse by Topic</div>
+      <h2 class="st" data-k="secCatT">Popular Categories</h2>
+    </div>
+    <div class="catg rev" id="catGrid"></div>
+  </section>
+
+  <!-- ══ RECOMMENDATIONS ══ -->
+  <div class="sdiv"></div>
+  <section id="recs" style="background:linear-gradient(180deg,var(--deep) 0%,var(--void) 100%)">
+    <div class="sh rev">
+      <div class="ey" data-k="secRecEy">AI-Powered · Personalized</div>
+      <h2 class="st" data-k="secRecT">Curated for You</h2>
+      <p class="ss" data-k="secRecS">Our engine matches courses to your goals and Saudi market trends.</p>
+    </div>
+    <div class="g3 rev" id="recGrid"></div>
+  </section>
+
+  <!-- ══ ARCHITECTURE ══ -->
+  <div class="sdiv"></div>
+  <section class="arcbg" id="arch">
+    <div class="sh shc rev">
+      <div class="ey" data-k="secArchEy">Technical Foundation</div>
+      <h2 class="st" data-k="secArchT">System Architecture</h2>
+      <p class="ss" style="margin:0 auto" data-k="secArchS">Enterprise-grade infrastructure built for Saudi Arabia's
+        edtech market.</p>
+    </div>
+    <div class="arcg rev" id="archGrid"></div>
+  </section>
+
+  <!-- ══ ADMIN ══ -->
+  <div class="sdiv"></div>
+  <section class="admbg" id="admin">
+    <div class="sh rev">
+      <div class="ey" data-k="secAdmEy">Platform Management</div>
+      <h2 class="st" data-k="secAdmT">Admin Dashboard</h2>
+    </div>
+    <div class="admlayout rev">
+      <div class="admnav" id="admNav">
+        <button class="admi on" onclick="swAdm('ov',this)">📊 <span data-k="admOv">Overview</span></button>
+        <button class="admi" onclick="swAdm('crs',this)">📚 <span data-k="admCrs">Courses</span></button>
+        <button class="admi" onclick="swAdm('usr',this)">👥 <span data-k="admUsr">Users</span></button>
+        <button class="admi" onclick="swAdm('rev',this)">💰 <span data-k="admRev">Revenue</span></button>
+        <button class="admi" onclick="swAdm('ana',this)">📈 <span data-k="admAna">Analytics</span></button>
+        <button class="admi" onclick="swAdm('set',this)">⚙️ <span data-k="admSet">Settings</span></button>
+      </div>
+      <div class="admbody" id="aBody"></div>
+    </div>
+  </section>
+
+  <!-- ══ REVIEWS ══ -->
+  <div class="sdiv"></div>
+  <section class="rvbg" id="reviews">
+    <div class="sh shc rev">
+      <div class="ey" data-k="secRvEy">Community</div>
+      <h2 class="st" data-k="secRvT">Learner Stories</h2>
+    </div>
+    <div class="rvg rev" id="rvGrid"></div>
+  </section>
+
+  <!-- ══ PLANS ══ -->
+  <div class="sdiv"></div>
+  <section class="plbg" id="plans">
+    <div class="sh shc rev">
+      <div class="ey" data-k="secPlnEy">Platform Membership</div>
+      <h2 class="st" data-k="secPlnT">Choose Your Plan</h2>
+      <p class="ss" style="margin:0 auto" data-k="secPlnS">Joining Taqeem is always free. Premium plans unlock extra
+        features.</p>
+    </div>
+    <div class="plng rev" id="planGrid"></div>
+  </section>
+
+  <!-- ══ COMPARE BAR ══ -->
+  <div class="cbar" id="cBar">
+    <div class="cbt" data-k="cmpComparing">Comparing</div>
+    <div class="cslots">
+      <div class="csl" id="cs0">+ <span data-k="cmpAdd">Add a course</span></div>
+      <div class="csl" id="cs1">+ <span data-k="cmpAdd">Add a course</span></div>
+      <div class="csl" id="cs2">+ <span data-k="cmpAdd">Add a course</span></div>
+    </div>
+    <button class="btn bg sm" onclick="openCmpModal()" data-k="btnCmpNow">Compare Now</button>
+    <button class="btn bgl sm" onclick="clearCmp()" data-k="btnClear">Clear</button>
+  </div>
+
+  <!-- ══ AUTH MODAL ══ -->
+  <div class="ov" id="authOv">
+    <div class="modal mmd">
+      <div class="mhd">
+        <h2 id="authTitle">—</h2>
+        <button class="xbtn" onclick="closeM('authOv')">✕</button>
+      </div>
+      <div class="fnote">
+        <span style="font-size:20px;flex-shrink:0">🎉</span>
+        <p><strong data-k="fnT">Joining Taqeem is completely free.</strong> <span data-k="fnB">No credit card required.
+            You only pay when you enroll in a paid course.</span></p>
+      </div>
+      <div class="atabs">
+        <button class="atab on" id="tabL" onclick="swTab('login')" data-k="tabSignIn">Sign In</button>
+        <button class="atab" id="tabR" onclick="swTab('reg')" data-k="tabRegFree">Register Free</button>
+      </div>
+      <div id="authBody"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAYMENT MODAL ══ -->
+  <div class="ov" id="payOv">
+    <div class="modal mlg" id="payModal"></div>
+  </div>
+
+  <!-- ══ SUCCESS MODAL ══ -->
+  <div class="ov" id="sucOv">
+    <div class="modal msm" id="sucModal"></div>
+  </div>
+
+  <!-- ══ COMPARE MODAL ══ -->
+  <div class="ov" id="cmpOv">
+    <div class="modal mlg">
+      <div class="mhd">
+        <h2 data-k="cmpTitle">Course Comparison</h2>
+        <button class="xbtn" onclick="closeM('cmpOv')">✕</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ctbl" id="cmpTbl"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="fg">
+      <div class="fc">
+        <div class="logo" style="margin-bottom:14px">
+          <div class="logo-gem">T</div>
+          <div class="logo-stack">
+            <div class="logo-en">Taqeem<span>.</span></div>
+            <div class="logo-ar">تقييم</div>
+          </div>
+        </div>
+        <p data-k="ftAbout">Saudi Arabia's course aggregation platform. Free to join, free to browse — you pay only when
+          enrolling in a paid course.</p>
+      </div>
+      <div class="fc">
+        <h5 data-k="ftPlatform">Platform</h5>
+        <ul>
+          <li><a href="#" data-k="ftBrowse">Browse Courses</a></li>
+          <li><a href="#" data-k="ftFreeCrs">Free Courses</a></li>
+          <li><a href="#" data-k="ftSch">Scholarships</a></li>
+          <li><a href="#" data-k="ftAcad">For Academies</a></li>
+        </ul>
+      </div>
+      <div class="fc">
+        <h5 data-k="ftCompany">Company</h5>
+        <ul>
+          <li><a href="#" data-k="ftAboutUs">About Taqeem</a></li>
+          <li><a href="#" data-k="ftInvest">Investors</a></li>
+          <li><a href="#" data-k="ftCareers">Careers</a></li>
+          <li><a href="#" data-k="ftPress">Press</a></li>
+        </ul>
+      </div>
+      <div class="fc">
+        <h5 data-k="ftLegal">Legal</h5>
+        <ul>
+          <li><a href="#" data-k="ftPrivacy">Privacy Policy</a></li>
+          <li><a href="#" data-k="ftTerms">Terms of Service</a></li>
+          <li><a href="#" data-k="ftPDPL">PDPL Compliance</a></li>
+          <li><a href="#" data-k="ftCookies">Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fb">
+      <span data-k="ftCr">© 2025 Taqeem Technologies · CR 1010123456 · Riyadh, Saudi Arabia</span>
+      <span data-k="ftVision">Built for Vision 2030 🇸🇦</span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toastEl"></div>
+
+  <script>
+    /* ════════════════════════════════════════════════
+       TRANSLATIONS  (en / ar)
+    ════════════════════════════════════════════════ */
+    const TR = {
+      en: {
+        nCourses: "Courses", nCats: "Categories", nForYou: "For You", nPlans: "Plans", nDash: "Dashboard",
+        btnIn: "Sign In", btnJoin: "Join Free",
+        heroBadge: "🇸🇦 Saudi Arabia's Premier Course Hub",
+        h1a: "Learn", h1b: "anything.", h1c: "Pay only", h1d: "when needed.",
+        heroSub: "Browse 12,000+ courses from Saudi Arabia's top academies. Platform registration is always free — you only pay for courses that cost something.",
+        heroCta1: "Explore Courses →", heroCta2: "Join Free — No Card",
+        trustL: "learners in the Kingdom", trustR: "4.9 avg. rating",
+        searchTitle: "Find your next course",
+        searchPH: "Search courses, skills, academies…",
+        sCourses: "Courses", sFree: "Free", sAcad: "Academies",
+        secCrsEy: "Course Catalog", secCrsT: "Find Your Next Course", secCrsS: "Free and paid courses from Saudi Arabia's leading academies.",
+        tabAll: "All Courses", tabFree: "Free Only", tabPaid: "Paid Only", tabSch: "Scholarships",
+        fCat: "Category", fPrice: "Max Price",
+        chAll: "All", chTech: "Tech", chBiz: "Business", chDes: "Design", chDat: "Data",
+        srtPop: "Most Popular", srtAsc: "Price: Low → High", srtDesc: "Price: High → Low", srtRat: "Highest Rated", srtNew: "Newest",
+        btnCmp: "Compare Selected →",
+        secCatEy: "Browse by Topic", secCatT: "Popular Categories",
+        secRecEy: "AI-Powered · Personalized", secRecT: "Curated for You", secRecS: "Our engine matches courses to your goals and Saudi market trends.",
+        secArchEy: "Technical Foundation", secArchT: "System Architecture", secArchS: "Enterprise-grade infrastructure built for Saudi Arabia's edtech market.",
+        secAdmEy: "Platform Management", secAdmT: "Admin Dashboard",
+        admOv: "Overview", admCrs: "Courses", admUsr: "Users", admRev: "Revenue", admAna: "Analytics", admSet: "Settings",
+        secRvEy: "Community", secRvT: "Learner Stories",
+        secPlnEy: "Platform Membership", secPlnT: "Choose Your Plan", secPlnS: "Joining Taqeem is always free. Premium plans unlock extra features.",
+        notifTitle: "Notifications",
+        n1t: "Free Course Ending Soon", n1s: "AWS Cloud Practitioner — closes in 48h",
+        n2t: "Price Drop Alert", n2s: "Data Science Bootcamp — now SAR 149 (was 380)",
+        n3t: "Scholarship Available", n3s: "Misk Foundation — Full-stack Development",
+        n4t: "Certificate Ready", n4s: "UI/UX Design — download your certificate",
+        fnT: "Joining Taqeem is completely free.", fnB: "No credit card required. You only pay when you enroll in a paid course.",
+        tabSignIn: "Sign In", tabRegFree: "Register Free",
+        authLogin: "Sign In to Taqeem", authReg: "Create Free Account",
+        lEmail: "Email", lPass: "Password", lFN: "First Name", lLN: "Last Name", lGoal: "Learning Goal",
+        g1: "Land a tech job", g2: "Career switch", g3: "Upskill", g4: "Personal interest",
+        lRemember: "Remember me", lForgot: "Forgot password?",
+        btnDoLogin: "Sign In & Continue", btnDoReg: "Create Free Account →",
+        authOr: "or", sGoogle: "🔑 Google", sAbsher: "📱 Absher (Saudi ID)",
+        noAcc: "No account?", regFree: "Register free →", hasAcc: "Have an account?", siLink: "Sign in",
+        enrollIn: "Enrolling in",
+        cmpComparing: "Comparing", cmpAdd: "Add a course", btnCmpNow: "Compare Now", btnClear: "Clear",
+        cmpTitle: "Course Comparison",
+        checkoutTitle: "Secure Checkout", freeEnrollTitle: "Confirm Enrollment",
+        payMethod: "Payment Method",
+        pmCard: "Credit Card", pmMada: "Mada", pmSTC: "STC Pay", pmApple: "Apple Pay",
+        lHolder: "Cardholder Name", lCardNo: "Card Number", lExpiry: "Expiry", lCVV: "CVV",
+        lSTC: "STC Pay Mobile", stcOtp: "You'll receive an OTP on your STC Pay number.",
+        appleMsg: "Authenticate with Face ID or Touch ID.",
+        orderSummary: "Order Summary", oCrsPrice: "Course price", oDisc: "Discount", oVAT: "VAT (15%)", oTotal: "Total Due",
+        inclTitle: "✦ Included", inc1: "of content", inc2: "Lifetime access", inc3: "Certificate of completion", inc4: "Arabic & English subtitles",
+        payBtn: "Pay SAR {0} & Enroll", paySec: "🔒 256-bit SSL · PCI DSS · SAMA Licensed",
+        freeCrsTitle: "This course is completely free",
+        freeNoPay: "No payment required. Confirm your spot to start learning immediately.",
+        confirmFree: "✓ Confirm Free Enrollment",
+        enrolledTitle: "You're enrolled!", enrolledIn: "Successfully enrolled in",
+        enrolledBy: "by", freeConf: "Free enrollment confirmed ✓", paidConf: "Payment confirmed · Receipt sent to",
+        startLearning: "Start Learning →",
+        cmpFeat: "Feature", cmpAcad: "Academy", cmpType: "Type", cmpPrice: "Price", cmpDur: "Duration", cmpLvl: "Level", cmpRat: "Rating", cmpStd: "Students", cmpCert: "Certificate",
+        certY: "✅ Yes", certN: "❌ No",
+        admOvTitle: "Platform Overview", admEnroll: "Monthly Enrollments", admLrn: "Active Learners", admMRR: "MRR (SAR)", admSess: "Avg. Session",
+        admChart: "Enrollments — Last 7 Days",
+        admCrsTitle: "Course Management", admAddCrs: "+ Add Course", admSync: "⟳ Sync Academies",
+        tCrs: "Course", tTyp: "Type", tPrice: "Price", tStd: "Students",
+        admUsrTitle: "User Management", admTotUsr: "Total Users", admProSub: "Pro Subscribers", admCrsUsr: "Avg Courses/User", admRet: "30-Day Retention",
+        admRevTitle: "Revenue Analytics", admARR: "ARR Run-Rate", admComm: "Avg Commission", admFeat: "Featured Listings",
+        admAnaTitle: "Analytics", admTopSearch: "Top Search Terms",
+        admSetTitle: "Settings", setPlatName: "Platform Name", setComm: "Commission Rate (%)", setFeat: "Featured Price (SAR/mo)", setEmail: "Admin Email", btnSave: "Save Changes",
+        plFree: "Free", plPerFree: "forever", plPerMo: "/ month", plPerCust: "/ quote",
+        plCtaFree: "Get Started Free", plCtaPro: "Go Pro", plCtaEnt: "Contact Sales", plPopular: "Most Popular",
+        anyPrice: "Any price", sarPfx: "SAR ",
+        qt1: "💻 Tech", qt2: "📊 Data", qt3: "💼 Business", qt4: "🎨 Design", qt5: "🗣️ Language", qt6: "💰 Finance",
+        catSel: "All Categories",
+        ftAbout: "Saudi Arabia's course aggregation platform. Free to join, free to browse — you pay only when enrolling in a paid course.",
+        ftPlatform: "Platform", ftCompany: "Company", ftLegal: "Legal",
+        ftBrowse: "Browse Courses", ftFreeCrs: "Free Courses", ftSch: "Scholarships", ftAcad: "For Academies",
+        ftAboutUs: "About Taqeem", ftInvest: "Investors", ftCareers: "Careers", ftPress: "Press",
+        ftPrivacy: "Privacy Policy", ftTerms: "Terms of Service", ftPDPL: "PDPL Compliance", ftCookies: "Cookie Policy",
+        ftCr: "© 2025 Taqeem Technologies · CR 1010123456 · Riyadh, Saudi Arabia",
+        ftVision: "Built for Vision 2030 🇸🇦",
+        tWishA: "❤️ Saved to wishlist!", tWishR: "Removed from wishlist",
+        tCmpA: "Added to comparison", tCmpMax: "Max 3 courses", tCmpMin: "Select at least 2 courses",
+        tSearch: "Showing results…", tSignOut: "Signed out. See you soon!",
+        enrollFreeLbl: "Enroll Free", enrollPaidLbl: "Enroll →",
+        tyFree: "FREE", tyPaid: "PAID", tySch: "SCHOLARSHIP",
+        tyFreeL: "FREE", tyPaidL: "PAID", tySchL: "SCHOLARSHIP",
+        wBack: "Welcome back, ", accCreated: "🎉 Account created! Welcome, ",
+        perCrs: "per paid course", thisMonth: "this month",
+        dMon: "Mon", dTue: "Tue", dWed: "Wed", dThu: "Thu", dFri: "Fri", dSat: "Sat", dSun: "Sun",
+        editBtn: "Edit", saveSet: "Settings saved!", signoutBtn: "Sign out",
+        statCrs: "courses",
+      },
+      ar: {
+        nCourses: "الدورات", nCats: "الفئات", nForYou: "لك", nPlans: "الخطط", nDash: "لوحة التحكم",
+        btnIn: "تسجيل الدخول", btnJoin: "انضم مجاناً",
+        heroBadge: "🇸🇦 المنصة الأولى للدورات في المملكة",
+        h1a: "تعلّم", h1b: "أي شيء.", h1c: "ادفع فقط", h1d: "عند الحاجة.",
+        heroSub: "تصفّح أكثر من 12,000 دورة من أبرز الأكاديميات السعودية. التسجيل في المنصة مجاني دائماً — تدفع فقط للدورات المدفوعة.",
+        heroCta1: "استعرض الدورات ←", heroCta2: "انضم مجاناً — بدون بطاقة",
+        trustL: "متعلم في المملكة", trustR: "متوسط التقييم 4.9",
+        searchTitle: "ابحث عن دورتك القادمة",
+        searchPH: "ابحث عن الدورات والمهارات والأكاديميات…",
+        sCourses: "دورة", sFree: "مجاني", sAcad: "أكاديمية",
+        secCrsEy: "فهرس الدورات", secCrsT: "ابحث عن دورتك القادمة", secCrsS: "دورات مجانية ومدفوعة من أبرز الأكاديميات السعودية.",
+        tabAll: "جميع الدورات", tabFree: "المجانية فقط", tabPaid: "المدفوعة فقط", tabSch: "المنح الدراسية",
+        fCat: "الفئة", fPrice: "الحد الأقصى للسعر",
+        chAll: "الكل", chTech: "تقنية", chBiz: "أعمال", chDes: "تصميم", chDat: "بيانات",
+        srtPop: "الأكثر شعبية", srtAsc: "السعر: من الأقل", srtDesc: "السعر: من الأعلى", srtRat: "الأعلى تقييماً", srtNew: "الأحدث",
+        btnCmp: "مقارنة المختارة ←",
+        secCatEy: "تصفح حسب الموضوع", secCatT: "الفئات الشائعة",
+        secRecEy: "مدعوم بالذكاء الاصطناعي", secRecT: "مختارة خصيصاً لك", secRecS: "محركنا يطابق الدورات مع أهدافك واتجاهات سوق العمل السعودي.",
+        secArchEy: "الأساس التقني", secArchT: "هندسة النظام", secArchS: "بنية تحتية على مستوى المؤسسات لسوق التقنية التعليمية السعودي.",
+        secAdmEy: "إدارة المنصة", secAdmT: "لوحة تحكم المسؤول",
+        admOv: "نظرة عامة", admCrs: "الدورات", admUsr: "المستخدمون", admRev: "الإيرادات", admAna: "التحليلات", admSet: "الإعدادات",
+        secRvEy: "المجتمع", secRvT: "قصص المتعلمين",
+        secPlnEy: "عضوية المنصة", secPlnT: "اختر خطتك", secPlnS: "الانضمام إلى تقييم مجاني دائماً. الخطط المميزة تفتح ميزات إضافية.",
+        notifTitle: "الإشعارات",
+        n1t: "دورة مجانية على وشك الانتهاء", n1s: "دورة AWS — تنتهي خلال 48 ساعة",
+        n2t: "تنبيه انخفاض السعر", n2s: "معسكر علم البيانات — الآن 149 ريال (كان 380)",
+        n3t: "منحة دراسية متاحة", n3s: "مؤسسة مسك — تطوير الويب الشامل",
+        n4t: "الشهادة جاهزة", n4s: "تصميم UI/UX — تحميل شهادتك",
+        fnT: "الانضمام إلى تقييم مجاني تماماً.", fnB: "لا حاجة لبطاقة ائتمانية. تدفع فقط عند التسجيل في دورة مدفوعة.",
+        tabSignIn: "تسجيل الدخول", tabRegFree: "تسجيل مجاني",
+        authLogin: "تسجيل الدخول إلى تقييم", authReg: "إنشاء حساب مجاني",
+        lEmail: "البريد الإلكتروني", lPass: "كلمة المرور", lFN: "الاسم الأول", lLN: "اسم العائلة", lGoal: "هدف التعلم",
+        g1: "الحصول على وظيفة تقنية", g2: "تغيير المسار المهني", g3: "تطوير المهارات", g4: "اهتمام شخصي",
+        lRemember: "تذكرني", lForgot: "نسيت كلمة المرور؟",
+        btnDoLogin: "تسجيل الدخول والمتابعة", btnDoReg: "إنشاء حساب مجاني ←",
+        authOr: "أو", sGoogle: "🔑 Google", sAbsher: "📱 أبشر (الهوية الوطنية)",
+        noAcc: "لا يوجد حساب؟", regFree: "سجل مجاناً ←", hasAcc: "لديك حساب؟", siLink: "تسجيل الدخول",
+        enrollIn: "التسجيل في",
+        cmpComparing: "المقارنة", cmpAdd: "أضف دورة", btnCmpNow: "قارن الآن", btnClear: "مسح",
+        cmpTitle: "مقارنة الدورات",
+        checkoutTitle: "الدفع الآمن", freeEnrollTitle: "تأكيد التسجيل",
+        payMethod: "طريقة الدفع",
+        pmCard: "بطاقة ائتمانية", pmMada: "مدى", pmSTC: "STC Pay", pmApple: "Apple Pay",
+        lHolder: "اسم حامل البطاقة", lCardNo: "رقم البطاقة", lExpiry: "تاريخ الانتهاء", lCVV: "رمز CVV",
+        lSTC: "رقم STC Pay", stcOtp: "ستصلك رسالة تحقق على رقم STC Pay الخاص بك.",
+        appleMsg: "المصادقة عبر Face ID أو Touch ID.",
+        orderSummary: "ملخص الطلب", oCrsPrice: "سعر الدورة", oDisc: "الخصم", oVAT: "ضريبة القيمة المضافة (15%)", oTotal: "الإجمالي المستحق",
+        inclTitle: "✦ المحتوى المتضمن", inc1: "من المحتوى", inc2: "وصول مدى الحياة", inc3: "شهادة إتمام", inc4: "ترجمة عربي وإنجليزي",
+        payBtn: "دفع {0} ريال والتسجيل", paySec: "🔒 تشفير SSL 256-bit · PCI DSS · مرخص من ساما",
+        freeCrsTitle: "هذه الدورة مجانية تماماً",
+        freeNoPay: "لا حاجة للدفع. أكّد مكانك وابدأ التعلم فوراً.",
+        confirmFree: "✓ تأكيد التسجيل المجاني",
+        enrolledTitle: "أنت مسجل الآن!", enrolledIn: "تم التسجيل بنجاح في",
+        enrolledBy: "من تقديم", freeConf: "تم تأكيد التسجيل المجاني ✓", paidConf: "تم تأكيد الدفع · الإيصال أُرسل إلى",
+        startLearning: "ابدأ التعلم ←",
+        cmpFeat: "الميزة", cmpAcad: "الأكاديمية", cmpType: "النوع", cmpPrice: "السعر", cmpDur: "المدة", cmpLvl: "المستوى", cmpRat: "التقييم", cmpStd: "المتعلمون", cmpCert: "الشهادة",
+        certY: "✅ نعم", certN: "❌ لا",
+        admOvTitle: "نظرة عامة على المنصة", admEnroll: "التسجيلات الشهرية", admLrn: "المتعلمون النشطون", admMRR: "الإيراد الشهري (ريال)", admSess: "متوسط الجلسة",
+        admChart: "التسجيلات — آخر 7 أيام",
+        admCrsTitle: "إدارة الدورات", admAddCrs: "+ إضافة دورة", admSync: "⟳ مزامنة الأكاديميات",
+        tCrs: "الدورة", tTyp: "النوع", tPrice: "السعر", tStd: "المتعلمون",
+        admUsrTitle: "إدارة المستخدمين", admTotUsr: "إجمالي المستخدمين", admProSub: "المشتركون المميزون", admCrsUsr: "متوسط الدورات/مستخدم", admRet: "الاحتفاظ (30 يوم)",
+        admRevTitle: "تحليلات الإيرادات", admARR: "الإيراد السنوي", admComm: "متوسط العمولة", admFeat: "القوائم المميزة",
+        admAnaTitle: "التحليلات", admTopSearch: "أهم مصطلحات البحث",
+        admSetTitle: "الإعدادات", setPlatName: "اسم المنصة", setComm: "نسبة العمولة (%)", setFeat: "سعر القائمة المميزة (ريال/شهر)", setEmail: "البريد الإداري", btnSave: "حفظ التغييرات",
+        plFree: "مجاناً", plPerFree: "للأبد", plPerMo: "/ شهر", plPerCust: "/ عرض سعر",
+        plCtaFree: "ابدأ مجاناً", plCtaPro: "ترقية إلى Pro", plCtaEnt: "تواصل مع المبيعات", plPopular: "الأكثر شعبية",
+        anyPrice: "أي سعر", sarPfx: "ريال ",
+        qt1: "💻 تقنية", qt2: "📊 بيانات", qt3: "💼 أعمال", qt4: "🎨 تصميم", qt5: "🗣️ لغات", qt6: "💰 مالية",
+        catSel: "جميع الفئات",
+        ftAbout: "منصة تجميع الدورات في المملكة العربية السعودية. الانضمام والتصفح مجاناً — تدفع فقط عند التسجيل في دورة مدفوعة.",
+        ftPlatform: "المنصة", ftCompany: "الشركة", ftLegal: "القانونية",
+        ftBrowse: "تصفح الدورات", ftFreeCrs: "الدورات المجانية", ftSch: "المنح الدراسية", ftAcad: "للأكاديميات",
+        ftAboutUs: "عن تقييم", ftInvest: "المستثمرون", ftCareers: "الوظائف", ftPress: "الإعلام",
+        ftPrivacy: "سياسة الخصوصية", ftTerms: "شروط الخدمة", ftPDPL: "الامتثال لنظام البيانات", ftCookies: "سياسة الكوكيز",
+        ftCr: "© 2025 تقنيات تقييم · السجل التجاري 1010123456 · الرياض، المملكة العربية السعودية",
+        ftVision: "مبني لرؤية 2030 🇸🇦",
+        tWishA: "❤️ تم الحفظ في قائمة الرغبات!", tWishR: "تم الحذف من قائمة الرغبات",
+        tCmpA: "تمت الإضافة للمقارنة", tCmpMax: "الحد الأقصى 3 دورات", tCmpMin: "اختر دورتين على الأقل",
+        tSearch: "عرض النتائج…", tSignOut: "تم تسجيل الخروج. إلى اللقاء!",
+        enrollFreeLbl: "التسجيل مجاناً", enrollPaidLbl: "التسجيل ←",
+        tyFree: "مجاني", tyPaid: "مدفوع", tySch: "منحة",
+        tyFreeL: "مجاني", tyPaidL: "مدفوع", tySchL: "منحة",
+        wBack: "أهلاً بعودتك، ", accCreated: "🎉 تم إنشاء الحساب! أهلاً، ",
+        perCrs: "لكل دورة مدفوعة", thisMonth: "هذا الشهر",
+        dMon: "الإثنين", dTue: "الثلاثاء", dWed: "الأربعاء", dThu: "الخميس", dFri: "الجمعة", dSat: "السبت", dSun: "الأحد",
+        editBtn: "تعديل", saveSet: "تم حفظ الإعدادات!", signoutBtn: "تسجيل الخروج",
+        statCrs: "دورة",
+      }
+    };
+
+    let lang = 'en';
+    function T(k) { return (TR[lang] && TR[lang][k]) || TR.en[k] || k }
+
+    /* ── LANGUAGE SWITCH ── */
+    function setLang(l) {
+      lang = l; DB.setLang(l);
+      const html = document.getElementById('htmlRoot');
+      html.setAttribute('lang', l);
+      html.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
+      document.body.classList.toggle('ar', l === 'ar');
+      document.getElementById('lEN').classList.toggle('on', l === 'en');
+      document.getElementById('lAR').classList.toggle('on', l === 'ar');
+
+      // Update all data-k elements
+      document.querySelectorAll('[data-k]').forEach(el => {
+        const k = el.getAttribute('data-k');
+        if (TR[l] && TR[l][k]) el.textContent = TR[l][k];
+      });
+
+      // Dynamic elements
+      document.getElementById('heroIn').placeholder = T('searchPH');
+      const pv = document.getElementById('pVal'); if (pv) pv.textContent = T('anyPrice');
+
+      // Sort select
+      const ss = document.getElementById('sortSel');
+      if (ss) ss.innerHTML = `<option value="pop">${T('srtPop')}</option><option value="asc">${T('srtAsc')}</option><option value="desc">${T('srtDesc')}</option><option value="rat">${T('srtRat')}</option><option value="new">${T('srtNew')}</option>`;
+
+      // Category select
+      const cs = document.getElementById('catSel');
+      if (cs) cs.innerHTML = `<option value="">${T('catSel')}</option>` + CATS.map(c => `<option value="${c.id}">${c.name[l] || c.name.en}</option>`).join('');
+
+      // Quick tags
+      const qt = document.getElementById('qTags');
+      if (qt) qt.innerHTML = ['qt1', 'qt2', 'qt3', 'qt4', 'qt5', 'qt6'].map((k, i) =>
+        `<span class="qt" onclick="filterCat('${['tech', 'data', 'business', 'design', 'language', 'finance'][i]}')">${T(k)}</span>`).join('');
+
+      renderCourses(); renderCats(); renderRecs(); renderArch();
+      renderAdmin(curAdmView); renderReviews(); renderPlans();
+    }
+
+    /* ── VOICE SEARCH ── */
+    function startVoiceSearch() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert(lang === 'ar' ? "متصفحك لا يدعم البحث الصوتي." : "Your browser does not support voice search.");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      const btn = document.getElementById('micBtn');
+      const input = document.getElementById('heroIn');
+
+      recognition.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        btn.classList.add('listening');
+        input.placeholder = lang === 'ar' ? "جاري الاستماع..." : "Listening...";
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        input.value = transcript;
+        btn.classList.remove('listening');
+        showSugg(transcript); // Trigger suggestions for the recognized text
+        setTimeout(() => {
+          doSearch(); // Automatically search after a short delay
+        }, 500);
+      };
+
+      recognition.onerror = () => {
+        btn.classList.remove('listening');
+        input.placeholder = T('searchPH');
+      };
+
+      recognition.onend = () => {
+        btn.classList.remove('listening');
+        input.placeholder = T('searchPH');
+      };
+
+      recognition.start();
+    }
+
+    /* ════════════════════════════════════════════════
+       DATA
+    ════════════════════════════════════════════════ */
+    const COURSES = [
+      { id: 1, title: { en: "AWS Cloud Practitioner Fundamentals", ar: "أساسيات AWS Cloud Practitioner" }, academy: { en: "Saudi Digital Academy", ar: "الأكاديمية الرقمية السعودية" }, cat: "tech", type: "free", price: 0, rating: 4.8, students: 8900, dur: { en: "40h", ar: "40 ساعة" }, lvl: { en: "Beginner", ar: "مبتدئ" }, tags: ["hot", "certified"], deadline: { en: "48h", ar: "48 ساعة" }, ico: "☁️" },
+      { id: 2, title: { en: "Data Science Bootcamp", ar: "معسكر علم البيانات" }, academy: { en: "Tuwaiq Academy", ar: "أكاديمية طويق" }, cat: "data", type: "paid", price: 149, orig: 380, disc: 60, rating: 4.9, students: 3200, dur: { en: "120h", ar: "120 ساعة" }, lvl: { en: "Intermediate", ar: "متوسط" }, tags: ["hot", "scholarship"], ico: "📊" },
+      { id: 3, title: { en: "UI/UX Design Mastery", ar: "إتقان تصميم UI/UX" }, academy: { en: "Design+", ar: "Design+" }, cat: "design", type: "paid", price: 299, rating: 4.7, students: 2100, dur: { en: "80h", ar: "80 ساعة" }, lvl: { en: "Intermediate", ar: "متوسط" }, tags: ["new"], ico: "🎨" },
+      { id: 4, title: { en: "Business Arabic Communication", ar: "التواصل التجاري باللغة العربية" }, academy: { en: "Alison KSA", ar: "Alison KSA" }, cat: "language", type: "free", price: 0, rating: 4.5, students: 15000, dur: { en: "20h", ar: "20 ساعة" }, lvl: { en: "All Levels", ar: "جميع المستويات" }, tags: [], ico: "💬" },
+      { id: 5, title: { en: "Machine Learning with Python", ar: "تعلم الآلة مع Python" }, academy: { en: "KAUST Academy", ar: "أكاديمية جامعة الملك عبدالله" }, cat: "data", type: "paid", price: 449, orig: 699, disc: 35, rating: 4.9, students: 980, dur: { en: "160h", ar: "160 ساعة" }, lvl: { en: "Advanced", ar: "متقدم" }, tags: ["certified"], ico: "🤖" },
+      { id: 6, title: { en: "Digital Marketing Fundamentals", ar: "أساسيات التسويق الرقمي" }, academy: { en: "Misk Academy", ar: "أكاديمية مسك" }, cat: "business", type: "scholarship", price: 0, orig: 599, rating: 4.6, students: 12000, dur: { en: "60h", ar: "60 ساعة" }, lvl: { en: "Beginner", ar: "مبتدئ" }, tags: ["scholarship", "new"], ico: "📱" },
+      { id: 7, title: { en: "Full-Stack Web Development", ar: "تطوير الويب الشامل" }, academy: { en: "Tuwaiq Academy", ar: "أكاديمية طويق" }, cat: "tech", type: "paid", price: 799, orig: 1200, disc: 33, rating: 4.8, students: 1800, dur: { en: "200h", ar: "200 ساعة" }, lvl: { en: "Beginner→Pro", ar: "مبتدئ→محترف" }, tags: ["hot", "certified"], ico: "💻" },
+      { id: 8, title: { en: "Project Management Professional", ar: "إدارة المشاريع الاحترافية" }, academy: { en: "PMI Saudi Chapter", ar: "فصل PMI السعودي" }, cat: "business", type: "paid", price: 550, rating: 4.7, students: 760, dur: { en: "90h", ar: "90 ساعة" }, lvl: { en: "Intermediate", ar: "متوسط" }, tags: ["certified"], ico: "📋" },
+      { id: 9, title: { en: "Cybersecurity Essentials", ar: "أساسيات الأمن السيبراني" }, academy: { en: "Saudi Digital Academy", ar: "الأكاديمية الرقمية السعودية" }, cat: "tech", type: "free", price: 0, rating: 4.6, students: 6700, dur: { en: "35h", ar: "35 ساعة" }, lvl: { en: "Beginner", ar: "مبتدئ" }, tags: ["new"], ico: "🔐" },
+    ];
+    const CATS = [
+      { id: "tech", name: { en: "Technology", ar: "التقنية" }, ico: "💻", cnt: 3840 },
+      { id: "data", name: { en: "Data Science", ar: "علم البيانات" }, ico: "📊", cnt: 1260 },
+      { id: "business", name: { en: "Business", ar: "الأعمال" }, ico: "💼", cnt: 2100 },
+      { id: "design", name: { en: "Design", ar: "التصميم" }, ico: "🎨", cnt: 890 },
+      { id: "language", name: { en: "Language", ar: "اللغات" }, ico: "🗣️", cnt: 1450 },
+      { id: "finance", name: { en: "Finance", ar: "المالية" }, ico: "💰", cnt: 670 },
+      { id: "health", name: { en: "Healthcare", ar: "الرعاية الصحية" }, ico: "🏥", cnt: 430 },
+      { id: "engineering", name: { en: "Engineering", ar: "الهندسة" }, ico: "⚙️", cnt: 920 },
+    ];
+    const ARCH = [
+      { ico: "🌐", title: { en: "Frontend Layer", ar: "طبقة الواجهة" }, desc: { en: "React 18 + Next.js SSR with Arabic/English i18n, PWA support.", ar: "React 18 مع Next.js ودعم عربي/إنجليزي وتطبيق ويب تقدمي." }, tech: ["React", "Next.js", "TypeScript", "i18n"] },
+      { ico: "⚡", title: { en: "API Gateway", ar: "بوابة API" }, desc: { en: "GraphQL + REST hybrid, JWT auth, OAuth 2.0, rate limiting.", ar: "بنية هجينة GraphQL + REST مع مصادقة JWT وOAuth 2.0." }, tech: ["GraphQL", "REST", "JWT", "OAuth2"] },
+      { ico: "🗄️", title: { en: "Database Layer", ar: "طبقة قواعد البيانات" }, desc: { en: "PostgreSQL primary, Redis cache, Elasticsearch full-text search.", ar: "PostgreSQL أساسي، Redis للتخزين المؤقت، Elasticsearch للبحث." }, tech: ["PostgreSQL", "Redis", "Elasticsearch"] },
+      { ico: "🤖", title: { en: "ML Recommendations", ar: "توصيات بالذكاء الاصطناعي" }, desc: { en: "Hybrid collaborative + content-based model, retrained weekly.", ar: "نموذج هجين تعاوني ومحتوى، يُعاد تدريبه أسبوعياً." }, tech: ["Python", "FastAPI", "Scikit-learn"] },
+      { ico: "☁️", title: { en: "Cloud — AWS MENA", ar: "السحابة — AWS MENA" }, desc: { en: "Riyadh region, auto-scaling ECS, multi-AZ RDS, 99.9% SLA.", ar: "منطقة الرياض، ECS متقياسة، قواعد بيانات متعددة، SLA 99.9%." }, tech: ["AWS", "ECS", "RDS", "CloudFront"] },
+      { ico: "🔒", title: { en: "Security & PDPL", ar: "الأمان ونظام البيانات" }, desc: { en: "Saudi PDPL compliant, OWASP hardened, WAF, AES-256 at rest.", ar: "متوافق مع نظام حماية البيانات، WAF، تشفير AES-256." }, tech: ["WAF", "PDPL", "AES-256"] },
+    ];
+    const REVIEWS = [
+      { n: { en: "Mohammed Al-Rashid", ar: "محمد الراشد" }, i: "م", c: "#C8922A", bg: "rgba(200,146,42,0.14)", cr: { en: "AWS Cloud Practitioner", ar: "AWS Cloud Practitioner" }, s: 5, t: { en: "Taqeem showed me free AWS courses I never knew existed. Now certified at STC. Platform registration was instant — zero friction.", ar: "أظهرت لي تقييم دورات AWS المجانية التي لم أكن أعرفها. حاصل الآن على شهادة وأعمل في STC. التسجيل في المنصة كان فورياً ومجانياً." } },
+      { n: { en: "Sara Al-Ghamdi", ar: "سارة الغامدي" }, i: "س", c: "#0CB4AE", bg: "rgba(12,180,174,0.14)", cr: { en: "Data Science Bootcamp", ar: "معسكر علم البيانات" }, s: 5, t: { en: "The comparison feature saved me hours. Love that browsing is free — I explored everything before deciding which paid course to buy.", ar: "ميزة المقارنة وفّرت عليّ ساعات. أحب أن التصفح مجاني — استعرضت كل شيء قبل أن أقرر." } },
+      { n: { en: "Ahmed Khalid", ar: "أحمد خالد" }, i: "أ", c: "#3B82F6", bg: "rgba(59,130,246,0.14)", cr: { en: "Full-Stack Dev", ar: "تطوير الويب الشامل" }, s: 4, t: { en: "Price drop alerts notified me when my wishlist course went on sale. Got 40% off! Free registration meant I could wishlist for months.", ar: "تلقيت تنبيهاً بانخفاض سعر دورتي المفضلة. وفّرت 40%! التسجيل المجاني سمح لي بالحفظ لأشهر." } },
+      { n: { en: "Nora Al-Otaibi", ar: "نورة العتيبي" }, i: "ن", c: "#22C55E", bg: "rgba(34,197,94,0.14)", cr: { en: "UI/UX Design", ar: "تصميم UI/UX" }, s: 5, t: { en: "Very clean UI. The AI recommendations are genuinely good. I enrolled in two paid courses — checkout with Mada was smooth.", ar: "واجهة نظيفة جداً. توصيات الذكاء الاصطناعي دقيقة فعلاً. سجّلت في دورتين مدفوعتين — الدفع بمدى كان سلساً." } },
+      { n: { en: "Faisal Al-Dosari", ar: "فيصل الدوسري" }, i: "ف", c: "#F59E0B", bg: "rgba(245,158,11,0.14)", cr: { en: "Digital Marketing", ar: "التسويق الرقمي" }, s: 5, t: { en: "Found a full Misk scholarship through Taqeem. Free to apply, free to enroll — zero payment. Best platform for Saudi learners.", ar: "وجدت منحة مسك الكاملة عبر تقييم. التقديم مجاني والتسجيل مجاني. أفضل منصة للمتعلمين السعوديين." } },
+      { n: { en: "Layla Hassan", ar: "ليلى حسن" }, i: "ل", c: "#EF4444", bg: "rgba(239,68,68,0.14)", cr: { en: "Cybersecurity", ar: "الأمن السيبراني" }, s: 4, t: { en: "Great aggregation of SDA, Tuwaiq, Misk in one place. Enrolled in free cybersecurity and one paid bootcamp — distinction is very clear.", ar: "تجميع رائع لـ SDA وطويق ومسك في مكان واحد. سجّلت في الأمن المجاني ومعسكر مدفوع — التمييز واضح جداً." } },
+    ];
+    const PLANS_DATA = [
+      {
+        key: "exp", price: { en: "Free", ar: "مجاناً" }, perK: "plPerFree", feat: false, ctaK: "plCtaFree",
+        feats: { en: ["Browse all 12,000+ courses", "Save up to 5 courses", "Basic search & filter", "Email deadline alerts", "Access to all free courses"], ar: ["تصفح أكثر من 12,000 دورة", "حفظ حتى 5 دورات", "بحث وتصفية أساسيين", "تنبيهات المواعيد النهائية", "الوصول لجميع الدورات المجانية"] }
+      },
+      {
+        key: "pro", price: { en: "SAR 49", ar: "49 ريال" }, perK: "plPerMo", feat: true, ctaK: "plCtaPro",
+        feats: { en: ["Unlimited course wishlists", "AI-powered recommendations", "Price drop & deadline alerts", "Course comparison tool", "Progress tracker", "Priority support"], ar: ["قوائم رغبات غير محدودة", "توصيات بالذكاء الاصطناعي", "تنبيهات انخفاض الأسعار", "أداة مقارنة الدورات", "متتبع التقدم", "دعم ذو أولوية"] }
+      },
+      {
+        key: "ent", price: { en: "Custom", ar: "مخصص" }, perK: "plPerCust", feat: false, ctaK: "plCtaEnt",
+        feats: { en: ["Team dashboards", "Bulk enrollment", "Custom integrations", "Dedicated account manager", "HRDF invoice support", "White-label option"], ar: ["لوحات تحكم الفريق", "تسجيل جماعي", "تكاملات مخصصة", "مدير حساب مخصص", "دعم فاتورة هدف", "خيار العلامة البيضاء"] }
+      },
+    ];
+    const PLAN_NAMES = { exp: { en: "Explorer", ar: "المستكشف" }, pro: { en: "Pro Learner", ar: "المتعلم الاحترافي" }, ent: { en: "Enterprise", ar: "المؤسسات" } };
+    const THEME_GRADS = { tech: "linear-gradient(135deg,#0B1D30,#0A2E40)", data: "linear-gradient(135deg,#15092B,#221443)", design: "linear-gradient(135deg,#280820,#40102F)", language: "linear-gradient(135deg,#1E1A08,#2E2812)", business: "linear-gradient(135deg,#081C14,#0F2B1E)", finance: "linear-gradient(135deg,#1C1208,#2B1C0D)", health: "linear-gradient(135deg,#1C0808,#2B1010)", engineering: "linear-gradient(135deg,#08141C,#0F1E2B)" };
+
+    /* ── LOCAL DATABASE SERVICE ── */
+    class DB {
+      static init() {
+        if (!localStorage.getItem('TQ_SETUP')) {
+          localStorage.setItem('TQ_WISHLIST', JSON.stringify([]));
+          localStorage.setItem('TQ_ENROLLMENTS', JSON.stringify([]));
+          localStorage.setItem('TQ_SETUP', '1');
+        }
+      }
+      static getWishlist() { return new Set(JSON.parse(localStorage.getItem('TQ_WISHLIST') || '[]')); }
+      static saveWishlist(set) { localStorage.setItem('TQ_WISHLIST', JSON.stringify([...set])); }
+      static getEnrollments() { return JSON.parse(localStorage.getItem('TQ_ENROLLMENTS') || '[]'); }
+      static addEnrollment(id) {
+        const list = this.getEnrollments();
+        if (!list.includes(id)) {
+          list.push(id);
+          localStorage.setItem('TQ_ENROLLMENTS', JSON.stringify(list));
+        }
+      }
+      static isEnrolled(id) { return this.getEnrollments().includes(id); }
+      static setLang(l) { localStorage.setItem('TQ_LANG', l); }
+      static getLang() { return localStorage.getItem('TQ_LANG') || 'ar'; }
+    }
+    DB.init();
+
+    /* ── STATE ── */
+    let actTyp = 'all', maxP = 1000, sortM = 'pop', catFilter = '', searchQuery = '';
+    let wishlist = DB.getWishlist(), cmpIds = new Set(), cmpList = [];
+    let loggedIn = false, curUser = null, pendingC = null;
+    let curAdmView = 'ov';
+
+    /* ── INIT ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      setLang(DB.getLang());
+      countUp('cC', 12480, 'K'); countUp('cF', 4200, 'K'); countUp('cA', 84, '');
+      initReveal();
+    });
+
+    function countUp(id, tgt, sfx) {
+      const el = document.getElementById(id); if (!el) return;
+      let n = 0; const step = tgt / 55;
+      const tm = setInterval(() => {
+        n = Math.min(n + step, tgt);
+        el.textContent = (sfx === 'K' && n >= 1000) ? Math.floor(n / 1000) + 'K+' : Math.floor(n).toLocaleString();
+        if (n >= tgt) clearInterval(tm);
+      }, 20);
+    }
+
+    /* ── CARD HTML ── */
+    function cardH(c) {
+      const free = c.price === 0;
+      const stars = '★'.repeat(Math.round(c.rating)) + '☆'.repeat(5 - Math.round(c.rating));
+      const tl = c.type === 'free' ? T('tyFreeL') : c.type === 'scholarship' ? T('tySchL') : T('tyPaidL');
+      return `<div class="cc${cmpIds.has(c.id) ? ' cmpon' : ''}" id="cc${c.id}">
+    <div class="cth" style="background:${THEME_GRADS[c.cat] || THEME_GRADS.tech}">
+      <div class="cthi">${c.ico}</div>
+      <div class="cthb"></div>
+      <span class="ttag ${c.type}">${tl}</span>
+      ${c.disc ? `<span class="dtag">-${c.disc}%</span>` : ''}
+      <button class="wbtn${wishlist.has(c.id) ? ' sv' : ''}" onclick="togW(event,${c.id})">${wishlist.has(c.id) ? '❤️' : '🤍'}</button>
+      <button class="cmpbtn${cmpIds.has(c.id) ? ' on' : ''}" onclick="togCmp(event,${c.id})">⊞</button>
+    </div>
+    <div class="cb">
+      <div class="cac">${c.academy[lang] || c.academy.en}</div>
+      <div class="ct">${c.title[lang] || c.title.en}</div>
+      <div class="cm">
+        <span><b>${c.dur[lang] || c.dur.en}</b></span>
+        <span><b>${c.lvl[lang] || c.lvl.en}</b></span>
+        <span><b>${(c.students / 1000).toFixed(1)}K</b></span>
+      </div>
+      <div class="ctgs">
+        ${c.tags.map(tg => `<span class="ctg ${tg}">${tg === 'hot' ? (lang === 'ar' ? 'رائج' : 'Hot') :
+        tg === 'new' ? (lang === 'ar' ? 'جديد' : 'New') :
+          tg === 'certified' ? (lang === 'ar' ? 'معتمد' : 'Certified') :
+            (lang === 'ar' ? 'منحة' : 'Scholarship')
+        }</span>`).join('')}
+        <span class="ctg"><span class="cstars">${stars}</span> ${c.rating}</span>
+      </div>
+      <div class="cft">
+        <div>
+          <div class="pbox">
+            <span class="pnow${free ? ' fr' : ''}">${free ? T('tyFreeL') : T('sarPfx') + c.price}</span>
+            ${c.orig ? `<span class="pold">${T('sarPfx')}${c.orig}</span>` : ''}
+          </div>
+          ${c.deadline ? `<div class="ddl">⏰ ${c.deadline[lang] || c.deadline.en}</div>` : ''}
+        </div>
+        <button class="ebtn ${free ? 'efree' : 'epaid'}" onclick="handleEnroll(event,${c.id})">
+          ${free ? T('enrollFreeLbl') : T('enrollPaidLbl')}
+        </button>
+      </div>
+    </div>
+  </div>`;
+    }
+
+    function renderCourses(gid = 'courseGrid') {
+      let list = COURSES.filter(c => {
+        if (actTyp === 'free' && c.type !== 'free') return false;
+        if (actTyp === 'paid' && c.type !== 'paid') return false;
+        if (actTyp === 'sch' && c.type !== 'scholarship') return false;
+        if (catFilter && c.cat !== catFilter) return false;
+        if (c.price > maxP) return false;
+        if (searchQuery) {
+          const s = searchQuery.toLowerCase();
+          const match = (c.title[lang] || c.title.en).toLowerCase().includes(s) ||
+            (c.academy[lang] || c.academy.en).toLowerCase().includes(s);
+          if (!match) return false;
+        }
+        return true;
+      });
+      if (sortM === 'asc') list.sort((a, b) => a.price - b.price);
+      else if (sortM === 'desc') list.sort((a, b) => b.price - a.price);
+      else if (sortM === 'rat') list.sort((a, b) => b.rating - a.rating);
+      else if (sortM === 'new') list = [...list].reverse();
+      const el = document.getElementById(gid);
+      if (el) el.innerHTML = list.map(cardH).join('');
+    }
+
+    /* ════════════════════════════════
+       ENROLL FLOW
+       Platform registration = FREE
+       Course enrollment = free or paid
+    ════════════════════════════════ */
+    function handleEnroll(e, id) {
+      e.stopPropagation();
+      pendingC = COURSES.find(c => c.id === id);
+      if (!pendingC) return;
+      if (!loggedIn) { openAuth('login'); }
+      else { startCrsEnroll(pendingC); }
+    }
+    function startCrsEnroll(crs) {
+      if (!crs) return;
+      crs.price === 0 ? openFreeConfirm(crs) : openPayment(crs);
+    }
+    function openFreeConfirm(crs) {
+      document.getElementById('payModal').innerHTML = `
+    <div class="mhd"><h2>${T('freeEnrollTitle')}</h2><button class="xbtn" onclick="closeM('payOv')">✕</button></div>
+    <div class="cprev">
+      <div class="cpico">${crs.ico}</div>
+      <div style="flex:1"><div class="cpname">${crs.title[lang] || crs.title.en}</div><div class="cpac">${crs.academy[lang] || crs.academy.en} · ${crs.dur[lang] || crs.dur.en} · ${crs.lvl[lang] || crs.lvl.en}</div></div>
+      <span class="ttag free" style="position:static;align-self:flex-start;flex-shrink:0">${T('tyFreeL')}</span>
+    </div>
+    <div class="febox">
+      <div class="feico">🎓</div>
+      <div class="fetit">${T('freeCrsTitle')}</div>
+      <div class="fesub">${T('freeNoPay')}</div>
+      ${crs.deadline ? `<div style="margin-top:10px;font-size:12px;font-weight:700;color:var(--crimson)">⏰ ${crs.deadline[lang] || crs.deadline.en}</div>` : ''}
+    </div>
+    <button class="btn bem full lg" onclick="completeEnroll(${crs.id})">${T('confirmFree')}</button>`;
+      document.getElementById('payOv').classList.add('open');
+    }
+    function openPayment(crs) {
+      const vat = Math.round(crs.price * .15);
+      const total = crs.price + vat;
+      const dAmt = crs.disc ? Math.round(crs.orig * crs.disc / 100) : 0;
+      document.getElementById('payModal').innerHTML = `
+    <div class="mhd"><h2>${T('checkoutTitle')}</h2><button class="xbtn" onclick="closeM('payOv')">✕</button></div>
+    <div class="playout">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:12px">${T('payMethod')}</div>
+        <div class="pmg">
+          <div class="pmc on" onclick="selPM('card',this)"><span class="pmico">💳</span>${T('pmCard')}</div>
+          <div class="pmc" onclick="selPM('mada',this)"><span class="pmico">🏧</span>${T('pmMada')}</div>
+          <div class="pmc" onclick="selPM('stc',this)"><span class="pmico">📱</span>${T('pmSTC')}</div>
+          <div class="pmc" onclick="selPM('apple',this)"><span class="pmico">🍎</span>${T('pmApple')}</div>
+        </div>
+        <div class="pmf show" id="pmCard">
+          <div class="f"><label>${T('lHolder')}</label><input placeholder="${curUser?.name || ''}" value="${curUser?.name || ''}"></div>
+          <div class="f"><label>${T('lCardNo')}</label><input placeholder="4111 1111 1111 1111" maxlength="19" oninput="fmtCard(this)"></div>
+          <div class="fgrid">
+            <div class="f"><label>${T('lExpiry')}</label><input placeholder="MM / YY" maxlength="7"></div>
+            <div class="f"><label>${T('lCVV')}</label><input placeholder="•••" maxlength="4" type="password"></div>
+          </div>
+        </div>
+        <div class="pmf" id="pmMada">
+          <div class="f"><label>${T('lCardNo')}</label><input placeholder="5588 **** **** ****"></div>
+          <div class="fgrid">
+            <div class="f"><label>${T('lExpiry')}</label><input placeholder="MM / YY"></div>
+            <div class="f"><label>${T('lCVV')}</label><input placeholder="•••" type="password"></div>
+          </div>
+        </div>
+        <div class="pmf" id="pmStc">
+          <div class="f"><label>${T('lSTC')}</label><input placeholder="+966 5X XXX XXXX"></div>
+          <p style="font-size:13px;color:var(--t3);margin-top:8px;line-height:1.55">${T('stcOtp')}</p>
+        </div>
+        <div class="pmf" id="pmApple">
+          <div style="text-align:center;padding:22px 0">
+            <div style="font-size:54px">🍎</div>
+            <p style="font-size:14px;color:var(--t2);margin-top:12px">${T('appleMsg')}</p>
+          </div>
+        </div>
+        <button class="btn bg full lg" id="payBtn" onclick="processPayment(${crs.id},${total})" style="margin-top:8px">
+          ${T('payBtn').replace('{0}', total)}
+        </button>
+        <div class="psec">${T('paySec')}</div>
+      </div>
+      <div class="pright">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:14px">${T('orderSummary')}</div>
+        <div class="cprev" style="margin-bottom:16px">
+          <div class="cpico">${crs.ico}</div>
+          <div><div class="cpname">${crs.title[lang] || crs.title.en}</div><div class="cpac">${crs.academy[lang] || crs.academy.en}</div></div>
+        </div>
+        <div class="orow"><span>${T('oCrsPrice')}</span><span>${T('sarPfx')}${crs.price}</span></div>
+        ${crs.disc ? `<div class="orow disc"><span>${T('oDisc')} (${crs.disc}%)</span><span>- ${T('sarPfx')}${dAmt}</span></div>` : ''}
+        <div class="orow"><span>${T('oVAT')}</span><span>${T('sarPfx')}${vat}</span></div>
+        <div class="otot"><span>${T('oTotal')}</span><span>${T('sarPfx')}${total}</span></div>
+        <div style="margin-top:16px;padding:13px;background:var(--glass);border-radius:var(--rs);border:1px solid var(--b1)">
+          <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:6px">${T('inclTitle')}</div>
+          <ul style="font-size:12px;color:var(--t2);line-height:1.9;padding-${lang === 'ar' ? 'right' : 'left'}:16px">
+            <li>${crs.dur[lang] || crs.dur.en} ${T('inc1')}</li>
+            <li>${T('inc2')}</li><li>${T('inc3')}</li><li>${T('inc4')}</li>
+          </ul>
+        </div>
+      </div>
+    </div>`;
+      document.getElementById('payOv').classList.add('open');
+    }
+    function selPM(m, el) {
+      document.querySelectorAll('.pmc').forEach(c => c.classList.remove('on'));
+      el.classList.add('on');
+      ['card', 'mada', 'stc', 'apple'].forEach(k => {
+        const f = document.getElementById('pm' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (f) f.classList.toggle('show', k === m);
+      });
+    }
+    function fmtCard(i) { i.value = i.value.replace(/\D/g, '').substring(0, 16).replace(/(.{4})/g, '$1 ').trim() }
+    function processPayment(id, total) {
+      const b = document.getElementById('payBtn');
+      if (b) { b.textContent = lang === 'ar' ? '⏳ جاري المعالجة…' : '⏳ Processing…'; b.disabled = true }
+      setTimeout(() => { closeM('payOv'); completeEnroll(id) }, 1900);
+    }
+    function completeEnroll(id) {
+      const c = COURSES.find(x => x.id === id); if (!c) return;
+      DB.addEnrollment(id);
+      pendingC = null;
+      const isFree = c.price === 0;
+      document.getElementById('sucModal').innerHTML = `
+    <div class="sucwrap">
+      <div class="sucico">🎉</div>
+      <h2>${T('enrolledTitle')}</h2>
+      <p>${T('enrolledIn')}</p>
+      <p class="succn">"${c.title[lang] || c.title.en}"</p>
+      <p style="margin-top:5px;font-size:13px;color:var(--t3)">${T('enrolledBy')} ${c.academy[lang] || c.academy.en}</p>
+      <p class="succonf">${isFree ? T('freeConf') : T('paidConf') + ' ' + (curUser?.email || '')}</p>
+      <button class="btn bg full lg" style="margin-top:28px" onclick="closeM('sucOv')">${T('startLearning')}</button>
+    </div>`;
+      document.getElementById('sucOv').classList.add('open');
+    }
+
+    /* ── AUTH ── */
+    function openAuth(tab) { swTab(tab); document.getElementById('authOv').classList.add('open') }
+    function swTab(tab) {
+      document.getElementById('tabL').classList.toggle('on', tab === 'login');
+      document.getElementById('tabR').classList.toggle('on', tab !== 'login');
+      document.getElementById('authTitle').textContent = tab === 'login' ? T('authLogin') : T('authReg');
+      const hint = pendingC ? `
+    <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--rs);padding:11px 14px;margin-bottom:15px;display:flex;gap:10px;align-items:center">
+      <span style="font-size:22px">${pendingC.ico}</span>
+      <div><div style="font-size:11px;color:var(--t3);margin-bottom:2px">${T('enrollIn')}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--t1)">${pendingC.title[lang] || pendingC.title.en}</div></div>
+    </div>`: '';
+      document.getElementById('authBody').innerHTML = tab === 'login' ? `
+    ${hint}
+    <div class="f"><label>${T('lEmail')}</label><input type="email" id="liE" placeholder="you@email.com" value="demo@taqeem.sa"></div>
+    <div class="f"><label>${T('lPass')}</label><input type="password" id="liP" placeholder="••••••••" value="password123"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
+      <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--t2);cursor:pointer">
+        <input type="checkbox" checked style="accent-color:var(--gold)"> ${T('lRemember')}
+      </label>
+      <a style="font-size:13px;color:var(--gold-lt);cursor:pointer;font-weight:600">${T('lForgot')}</a>
+    </div>
+    <button class="btn bg full lg" onclick="doLogin()">${T('btnDoLogin')}</button>
+    <div class="adiv"><span>${T('authOr')}</span></div>
+    <div class="sgrid">
+      <button class="sbtn" onclick="doLogin()">${T('sGoogle')}</button>
+      <button class="sbtn" onclick="doLogin()">${T('sAbsher')}</button>
+    </div>
+    <div class="anote">${T('noAcc')} <a onclick="swTab('reg')">${T('regFree')}</a></div>
+  `: `
+    ${hint}
+    <div class="fgrid">
+      <div class="f"><label>${T('lFN')}</label><input id="rFN" placeholder="${lang === 'ar' ? 'محمد' : 'Mohammed'}"></div>
+      <div class="f"><label>${T('lLN')}</label><input id="rLN" placeholder="${lang === 'ar' ? 'الراشد' : 'Al-Rashid'}"></div>
+    </div>
+    <div class="f"><label>${T('lEmail')}</label><input type="email" id="rEM" placeholder="you@email.com"></div>
+    <div class="f"><label>${T('lPass')}</label><input type="password" id="rPW" placeholder="••••••••"></div>
+    <div class="f"><label>${T('lGoal')}</label>
+      <select><option>${T('g1')}</option><option>${T('g2')}</option><option>${T('g3')}</option><option>${T('g4')}</option></select>
+    </div>
+    <button class="btn bg full lg" onclick="doReg()">${T('btnDoReg')}</button>
+    <div class="adiv"><span>${T('authOr')}</span></div>
+    <div class="sgrid">
+      <button class="sbtn" onclick="doReg()">${T('sGoogle')}</button>
+      <button class="sbtn" onclick="doReg()">${T('sAbsher')}</button>
+    </div>
+    <div class="anote">${T('hasAcc')} <a onclick="swTab('login')">${T('siLink')}</a></div>`;
+    }
+    function doLogin() {
+      const em = document.getElementById('liE')?.value || 'demo@taqeem.sa';
+      loggedIn = true; curUser = { name: em.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), email: em, init: em[0].toUpperCase() };
+      closeM('authOv'); updNav(); toast(T('wBack') + curUser.name + '!');
+      if (pendingC) setTimeout(() => startCrsEnroll(pendingC), 320);
+    }
+    function doReg() {
+      const fn = document.getElementById('rFN')?.value || (lang === 'ar' ? 'مستخدم' : 'User');
+      const ln = document.getElementById('rLN')?.value || '';
+      const em = document.getElementById('rEM')?.value || 'user@taqeem.sa';
+      loggedIn = true; curUser = { name: (fn + ' ' + ln).trim(), email: em, init: (fn[0] || 'U').toUpperCase() };
+      closeM('authOv'); updNav(); toast(T('accCreated') + curUser.name);
+      if (pendingC) setTimeout(() => startCrsEnroll(pendingC), 320);
+    }
+    function signOut() { loggedIn = false; curUser = null; pendingC = null; updNav(); toast(T('tSignOut')) }
+    function updNav() {
+      const nr = document.getElementById('navR');
+      const lsw = `<div class="ls"><button class="lb${lang === 'en' ? ' on' : ''}" id="lEN" onclick="setLang('en')">EN</button><button class="lb${lang === 'ar' ? ' on' : ''}" id="lAR" onclick="setLang('ar')">عربي</button></div>`;
+      const nb = `<div class="nbell" onclick="togNotif()" id="nbell">🔔<div class="nbadge">3</div></div>`;
+      if (loggedIn && curUser) {
+        nr.innerHTML = `${lsw}${nb}
+      <div class="upill">
+        <div class="uav">${curUser.init}</div>
+        <div><div class="uname">${curUser.name}</div>
+        <button class="sout" onclick="signOut()">${T('signoutBtn')}</button></div>
+      </div>`;
+      } else {
+        nr.innerHTML = `${lsw}${nb}
+      <button class="btn bgl sm" onclick="openAuth('login')" data-k="btnIn">${T('btnIn')}</button>
+      <button class="btn bg sm" onclick="openAuth('reg')" data-k="btnJoin">${T('btnJoin')}</button>`;
+      }
+    }
+
+    /* ── WISHLIST & COMPARE ── */
+    function togW(e, id) {
+      e.stopPropagation();
+      if (!loggedIn) { openAuth('login'); return }
+      if (wishlist.has(id)) { wishlist.delete(id); toast(T('tWishR')) }
+      else { wishlist.add(id); toast(T('tWishA')) }
+      DB.saveWishlist(wishlist);
+      renderCourses();
+    }
+    function togCmp(e, id) {
+      e.stopPropagation();
+      if (cmpIds.has(id)) { cmpIds.delete(id); cmpList = cmpList.filter(c => c.id !== id) }
+      else if (cmpIds.size < 3) { cmpIds.add(id); cmpList.push(COURSES.find(c => c.id === id)); toast(T('tCmpA')) }
+      else { toast(T('tCmpMax')); return }
+      renderCourses(); updCmpBar();
+    }
+    function updCmpBar() {
+      const bar = document.getElementById('cBar');
+      bar.classList.toggle('show', cmpList.length > 0);
+      document.getElementById('cmpTrig').style.display = cmpList.length >= 2 ? 'flex' : 'none';
+      for (let i = 0; i < 3; i++) {
+        const sl = document.getElementById('cs' + i);
+        if (cmpList[i]) { sl.className = 'csl filled'; sl.innerHTML = `${(cmpList[i].title[lang] || cmpList[i].title.en).substring(0, 22)}… <span class="rm" onclick="remCmp(${cmpList[i].id})">✕</span>` }
+        else { sl.className = 'csl'; sl.textContent = '+ ' + T('cmpAdd') }
+      }
+    }
+    function remCmp(id) { cmpIds.delete(id); cmpList = cmpList.filter(c => c.id !== id); renderCourses(); updCmpBar() }
+    function clearCmp() { cmpIds.clear(); cmpList = []; renderCourses(); updCmpBar() }
+    function openCmpModal() {
+      if (cmpList.length < 2) { toast(T('tCmpMin')); return }
+      const rows = [
+        [T('cmpAcad'), ...cmpList.map(c => c.academy[lang] || c.academy.en)],
+        [T('cmpType'), ...cmpList.map(c => `<span class="ttag ${c.type}" style="position:static;display:inline-block;font-size:10px">${c.type === 'free' ? T('tyFreeL') : c.type === 'scholarship' ? T('tySchL') : T('tyPaidL')}</span>`)],
+        [T('cmpPrice'), ...cmpList.map(c => c.price === 0 ? `<span style="color:var(--emerald);font-weight:700">${T('tyFreeL')}</span>` : T('sarPfx') + c.price)],
+        [T('cmpDur'), ...cmpList.map(c => c.dur[lang] || c.dur.en)],
+        [T('cmpLvl'), ...cmpList.map(c => c.lvl[lang] || c.lvl.en)],
+        [T('cmpRat'), ...cmpList.map(c => '★ ' + c.rating)],
+        [T('cmpStd'), ...cmpList.map(c => c.students.toLocaleString())],
+        [T('cmpCert'), ...cmpList.map(() => Math.random() > .3 ? T('certY') : T('certN'))],
+      ];
+      document.getElementById('cmpTbl').innerHTML = `
+    <thead><tr><th>${T('cmpFeat')}</th>${cmpList.map(c => `<th>${(c.title[lang] || c.title.en).substring(0, 26)}…</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      document.getElementById('cmpOv').classList.add('open');
+    }
+
+    /* ── FILTERS ── */
+    function setTyp(t, el) { actTyp = t; document.querySelectorAll('.tab').forEach(b => b.classList.remove('on')); el.classList.add('on'); renderCourses() }
+    function setChip(el) { document.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); el.classList.add('on'); renderCourses() }
+    function upPrice(v) { maxP = +v; document.getElementById('pVal').textContent = +v >= 1000 ? T('anyPrice') : T('sarPfx') + parseInt(v).toLocaleString(); renderCourses() }
+    function setSrt(v) { sortM = v; renderCourses() }
+    function filterCat(cat) { catFilter = cat; renderCourses(); gos('courses'); toast((CATS.find(c => c.id === cat)?.name[lang]) || cat) }
+
+    /* ── RENDERS ── */
+    function renderCats() {
+      const el = document.getElementById('catGrid');
+      if (el) el.innerHTML = CATS.map(c => `
+    <div class="catc" onclick="filterCat('${c.id}')">
+      <div class="cico">${c.ico}</div>
+      <div class="cnam">${c.name[lang] || c.name.en}</div>
+      <div class="ccnt">${c.cnt.toLocaleString()} ${T('statCrs')}</div>
+    </div>`).join('');
+    }
+    function renderRecs() {
+      const el = document.getElementById('recGrid');
+      if (el) el.innerHTML = [...COURSES].sort(() => Math.random() - .5).slice(0, 3).map(cardH).join('');
+    }
+    function renderArch() {
+      const el = document.getElementById('archGrid');
+      if (el) el.innerHTML = ARCH.map(a => `
+    <div class="arcc">
+      <div class="arcico">${a.ico}</div>
+      <div class="arct">${a.title[lang] || a.title.en}</div>
+      <div class="arcd">${a.desc[lang] || a.desc.en}</div>
+      <div class="tpills">${a.tech.map(tp => `<span class="tp">${tp}</span>`).join('')}</div>
+    </div>`).join('');
+    }
+
+    /* ── ADMIN ── */
+    const AV = {
+      ov: () => `<div class="admtit">${T('admOvTitle')}</div>
+    <div class="krow">
+      <div class="kpi"><div class="kl">${T('admEnroll')}</div><div class="kv">24,891</div><div class="kd up">↑ 12.4%</div></div>
+      <div class="kpi"><div class="kl">${T('admLrn')}</div><div class="kv">98,204</div><div class="kd up">↑ 8.2%</div></div>
+      <div class="kpi"><div class="kl">${T('admMRR')}</div><div class="kv">184K</div><div class="kd up">↑ 23%</div></div>
+      <div class="kpi"><div class="kl">${T('admSess')}</div><div class="kv">18m</div><div class="kd dn">↓ 2%</div></div>
+    </div>
+    <div class="chbox"><div class="cht">${T('admChart')}</div>
+      <div class="brow">${['dMon', 'dTue', 'dWed', 'dThu', 'dFri', 'dSat', 'dSun'].map((dk, i) => {
+        const v = [65, 80, 55, 90, 72, 85, 68][i];
+        return `<div class="bc"><div class="b" style="height:${v}%;background:linear-gradient(to top,#086868,var(--aqua-lt));min-height:5px"></div><div class="bl">${T(dk)}</div></div>`;
+      }).join('')}</div>
+    </div>`,
+      crs: () => `<div class="admtit">${T('admCrsTitle')}</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <button class="btn bg sm" onclick="toast('${T('admAddCrs')}')">${T('admAddCrs')}</button>
+      <button class="btn bgl sm" onclick="toast('${T('admSync')}')">${T('admSync')}</button>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--gold-ring)">${[T('tCrs'), T('tTyp'), T('tPrice'), T('tStd'), ''].map(h => `<th style="padding:9px 12px;text-align:${lang === 'ar' ? 'right' : 'left'};color:var(--gold-lt);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${h}</th>`).join('')}</tr></thead>
+      <tbody>${COURSES.slice(0, 5).map(c => `<tr style="border-bottom:1px solid var(--b1)">
+        <td style="padding:9px 12px;font-weight:600;color:var(--t1)">${(c.title[lang] || c.title.en).substring(0, 30)}…</td>
+        <td style="padding:9px 12px"><span class="ttag ${c.type}" style="position:static;display:inline-block;font-size:10px">${c.type === 'free' ? T('tyFreeL') : c.type === 'scholarship' ? T('tySchL') : T('tyPaidL')}</span></td>
+        <td style="padding:9px 12px;color:var(--gold-lt);font-weight:700">${c.price === 0 ? T('tyFreeL') : T('sarPfx') + c.price}</td>
+        <td style="padding:9px 12px;color:var(--t2)">${c.students.toLocaleString()}</td>
+        <td style="padding:9px 12px"><button class="btn bgl sm" onclick="toast('${T('editBtn')}')">${T('editBtn')}</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`,
+      usr: () => `<div class="admtit">${T('admUsrTitle')}</div>
+    <div class="krow">
+      <div class="kpi"><div class="kl">${T('admTotUsr')}</div><div class="kv">98K</div><div class="kd up">↑ 8%</div></div>
+      <div class="kpi"><div class="kl">${T('admProSub')}</div><div class="kv">4,210</div><div class="kd up">↑ 15%</div></div>
+      <div class="kpi"><div class="kl">${T('admCrsUsr')}</div><div class="kv">3.2</div><div class="kd up">↑ 0.4</div></div>
+      <div class="kpi"><div class="kl">${T('admRet')}</div><div class="kv">68%</div><div class="kd up">↑ 3%</div></div>
+    </div>`,
+      rev: () => `<div class="admtit">${T('admRevTitle')}</div>
+    <div class="krow">
+      <div class="kpi"><div class="kl">MRR</div><div class="kv" style="color:var(--gold-lt)">${T('sarPfx')}184K</div><div class="kd up">↑ 23%</div></div>
+      <div class="kpi"><div class="kl">${T('admARR')}</div><div class="kv">${T('sarPfx')}2.2M</div><div class="kd up">↑ 18%</div></div>
+      <div class="kpi"><div class="kl">${T('admComm')}</div><div class="kv">12%</div><div class="kd" style="color:var(--t3)">${T('perCrs')}</div></div>
+      <div class="kpi"><div class="kl">${T('admFeat')}</div><div class="kv">${T('sarPfx')}32K</div><div class="kd" style="color:var(--t3)">${T('thisMonth')}</div></div>
+    </div>`,
+      ana: () => `<div class="admtit">${T('admAnaTitle')}</div>
+    <div class="chbox"><div class="cht">${T('admTopSearch')}</div>
+      ${[['Data Science', 89], ['AWS Cloud', 76], ['Python', 71], [lang === 'ar' ? 'التسويق الرقمي' : 'Digital Marketing', 65], [lang === 'ar' ? 'إدارة المشاريع' : 'Project Mgmt', 58]].map(([tt, v]) => `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span style="font-size:13px;min-width:150px;color:var(--t1)">${tt}</span>
+          <div style="flex:1;height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden">
+            <div style="width:${v}%;height:100%;background:linear-gradient(90deg,var(--aqua),var(--aqua-lt));border-radius:4px"></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:var(--aqua-lt);min-width:30px">${v}%</span>
+        </div>`).join('')}
+    </div>`,
+      set: () => `<div class="admtit">${T('admSetTitle')}</div>
+    <div class="f"><label>${T('setPlatName')}</label><input value="Taqeem · تقييم"></div>
+    <div class="fgrid">
+      <div class="f"><label>${T('setComm')}</label><input type="number" value="12"></div>
+      <div class="f"><label>${T('setFeat')}</label><input type="number" value="2000"></div>
+    </div>
+    <div class="f"><label>${T('setEmail')}</label><input value="admin@taqeem.sa"></div>
+    <button class="btn bg sm" onclick="toast(T('saveSet'))">${T('btnSave')}</button>`,
+    };
+    function swAdm(v, el) { document.querySelectorAll('.admi').forEach(i => i.classList.remove('on')); el.classList.add('on'); curAdmView = v; renderAdmin(v) }
+    function renderAdmin(v) { const el = document.getElementById('aBody'); if (el) el.innerHTML = (AV[v] || AV.ov)() }
+
+    function renderReviews() {
+      const el = document.getElementById('rvGrid');
+      if (el) el.innerHTML = REVIEWS.map(r => `
+    <div class="rvc">
+      <div class="rvhd">
+        <div class="rvav" style="background:${r.bg};color:${r.c}">${r.i}</div>
+        <div><div class="rvn">${r.n[lang] || r.n.en}</div><div class="rvm">${r.cr[lang] || r.cr.en}</div></div>
+      </div>
+      <div class="rvs">${'★'.repeat(r.s)}${'☆'.repeat(5 - r.s)}</div>
+      <div class="rvt">"${r.t[lang] || r.t.en}"</div>
+    </div>`).join('');
+    }
+
+    function renderPlans() {
+      const el = document.getElementById('planGrid'); if (!el) return;
+      el.innerHTML = PLANS_DATA.map(p => `
+    <div class="plnc${p.feat ? ' feat' : ''}">
+      ${p.feat ? `<div class="plbadge">${T('plPopular')}</div>` : ''}
+      <div class="plnn">${PLAN_NAMES[p.key][lang]}</div>
+      <div class="plnp">${p.price[lang]}</div>
+      <div class="plnper">${T(p.perK)}</div>
+      <ul class="plnfs">${p.feats[lang].map(f => `<li>${f}</li>`).join('')}</ul>
+      <button class="btn full lg ${p.feat ? 'bt' : 'bo'}" onclick="toast(T('${p.ctaK}')+'…')">${T(p.ctaK)}</button>
+    </div>`).join('');
+    }
+
+    /* ── SEARCH ── */
+    const SUGG = { en: ['AWS Cloud Practitioner', 'Data Science', 'Machine Learning', 'UI/UX Design', 'Python Programming', 'Digital Marketing', 'Project Management', 'Cybersecurity', 'Full-Stack Development'], ar: ['دورة AWS السحابية', 'علم البيانات', 'تعلم الآلة', 'تصميم UI/UX', 'برمجة Python', 'التسويق الرقمي', 'إدارة المشاريع', 'الأمن السيبراني', 'تطوير الويب الشامل'] };
+    function showSugg(v) {
+      const box = document.getElementById('suggDrop');
+      if (!v || v.length < 2) { box.classList.remove('open'); return }
+      const m = (SUGG[lang] || SUGG.en).filter(s => s.toLowerCase().includes(v.toLowerCase())).slice(0, 5);
+      if (!m.length) { box.classList.remove('open'); return }
+      box.innerHTML = m.map(s => `<div class="si" onmousedown="pickSugg('${s}')">${s}</div>`).join('');
+      box.classList.add('open');
+    }
+    function hideSugg() { document.getElementById('suggDrop').classList.remove('open') }
+    function pickSugg(v) { document.getElementById('heroIn').value = v; hideSugg(); searchQuery = v; renderCourses(); gos('courses'); toast(T('tSearch')) }
+    function doSearch() {
+      searchQuery = document.getElementById('heroIn').value;
+      renderCourses();
+      gos('courses');
+      toast(T('tSearch'));
+    }
+
+    /* ── UTILS ── */
+    function closeM(id) { document.getElementById(id).classList.remove('open') }
+    function togNotif() { document.getElementById('notifP').classList.toggle('open') }
+    function gos(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+    let tTimer;
+    function toast(m) { const el = document.getElementById('toastEl'); el.textContent = m; el.classList.add('show'); clearTimeout(tTimer); tTimer = setTimeout(() => el.classList.remove('show'), 2800) }
+    function initReveal() {
+      const obs = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target) } }) }, { threshold: .08 });
+      document.querySelectorAll('.rev').forEach(el => obs.observe(el));
+    }
+
+    document.querySelectorAll('.ov').forEach(el => el.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('open') }));
+    document.addEventListener('click', e => {
+      const p = document.getElementById('notifP'), b = document.getElementById('nbell');
+      if (p && b && !p.contains(e.target) && !b.contains(e.target)) p.classList.remove('open');
+    });
+  </script>
+</body>
+
+</html>
