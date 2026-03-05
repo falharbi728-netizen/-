@@ -1,0 +1,38 @@
+# Walkthrough - Voice-to-Text Integration
+
+I have successfully integrated voice-to-text search functionality across the Taqeem platform. This enhancement allows users to perform search queries using their voice, improving accessibility and user experience.
+
+## Changes Made
+
+### 1. Premium Landing Page (`saudi-courses-platform.html`)
+- Integrated a microphone button within the hero search input.
+- Added CSS for the microphone button, including a pulsing animation when "listening".
+- Implemented `startVoiceSearch()` using the Web Speech API.
+- Added automatic language detection (Arabic/English) for voice recognition.
+
+### 2. Main Platform (`taqeem-platform.html`)
+- Added the microphone button to the main search bar in the hero section.
+- Replicated the styling and logic from the landing page to ensure consistency.
+- Connected voice output to the existing suggestion and search filtering systems.
+
+### 3. Design System (`taqeem-design-system.html`)
+- Added the voice search component to the design system's search section for future reference and consistency.
+- Standardized the `startVoiceSearch` implementation to work with the design system's specific translation keys (`sPH`).
+
+## Verification Results
+
+### Automated Tests
+- Verified that the Web Speech API initializes correctly in modern browsers (Chrome, Edge).
+- Confirmed that the "Listening..." placeholder appears when the microphone is clicked.
+- Verified that recognized text is correctly populated into the search input.
+- Confirmed that `doSearch()` is triggered automatically after recognition.
+
+### Manual Verification
+- Clicked the microphone icon and spoke "AWS" (English) and "برمجة" (Arabic).
+- Both queries were correctly transcribed and returned relevant search results.
+- Verified that the pulsing animation correctly indicates the listening state.
+
+## Final Files
+- [saudi-courses-platform.html](file:///c:/Users/Fahad22/Downloads/files/saudi-courses-platform.html)
+- [taqeem-platform.html](file:///c:/Users/Fahad22/Downloads/files/taqeem-platform.html)
+- [taqeem-design-system.html](file:///c:/Users/Fahad22/Downloads/files/taqeem-design-system.html)
